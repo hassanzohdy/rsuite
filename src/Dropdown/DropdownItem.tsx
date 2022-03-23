@@ -95,7 +95,7 @@ const DropdownItem: RsRefForwardingComponent<'li', DropdownMenuItemProps> = Reac
       (event: React.SyntheticEvent) => {
         onSelect?.(eventKey, event);
       },
-      [onSelect, eventKey, dropdown]
+      [onSelect, eventKey]
     );
 
     const sidenav = useContext(SidenavContext);
