@@ -94,7 +94,6 @@ const DropdownItem: RsRefForwardingComponent<'li', DropdownMenuItemProps> = Reac
     const handleSelectItem = useCallback(
       (event: React.SyntheticEvent) => {
         onSelect?.(eventKey, event);
-        dropdown?.onSelect?.(eventKey, event);
       },
       [onSelect, eventKey, dropdown]
     );
