@@ -1,6 +1,10 @@
 import React from 'react';
 import ReactTestUtils, { act, Simulate } from 'react-dom/test-utils';
+<<<<<<< HEAD
 import { render, fireEvent } from '@testing-library/react';
+=======
+import { fireEvent, render } from '@testing-library/react';
+>>>>>>> f8c0d955 (fix: used react testing render function)
 import { getDOMNode } from '@test/testUtils';
 import DropdownMenu from '../DropdownMenu';
 import DropdownItem from '../DropdownItem';
@@ -234,17 +238,33 @@ describe('<Dropdown.Menu>', () => {
     assert.isNotNull(instance.querySelector('.rs-dropdown-item-submenu'));
   });
 
-  it('Should highlight menu item when hover', () => {
+  it('Should call onSelect callback with correct `eventKey` once', () => {
+    const selectedValues = [];
+
     const { getByTestId } = render(
-      <DropdownMenu>
-        <DropdownItem data-testid="item-1">1</DropdownItem>
-        <DropdownItem>2</DropdownItem>
-        <DropdownItem>3</DropdownItem>
-        <DropdownItem>4</DropdownItem>
+      <DropdownMenu
+        onSelect={eventKey => {
+          selectedValues.push(eventKey);
+        }}
+      >
+        <DropdownItem data-testid="item-1" eventKey={1}>
+          1
+        </DropdownItem>
+        <DropdownItem data-testid="item-2" eventKey={2}>
+          2
+        </DropdownItem>
+        <DropdownItem data-testid="item-3" eventKey={3}>
+          3
+        </DropdownItem>
       </DropdownMenu>
     );
 
-    const menuItem = getByTestId('item-1');
+    act(() => {
+      const menuItem = getByTestId('item-1');
+      Simulate.click(menuItem, {
+        bubbles: true
+      });
+    });
 
     userEvent.hover(menuItem);
 
