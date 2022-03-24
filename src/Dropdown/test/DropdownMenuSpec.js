@@ -1,10 +1,6 @@
 import React from 'react';
 import ReactTestUtils, { act, Simulate } from 'react-dom/test-utils';
-<<<<<<< HEAD
-import { render, fireEvent } from '@testing-library/react';
-=======
 import { fireEvent, render } from '@testing-library/react';
->>>>>>> f8c0d955 (fix: used react testing render function)
 import { getDOMNode } from '@test/testUtils';
 import DropdownMenu from '../DropdownMenu';
 import DropdownItem from '../DropdownItem';
@@ -239,14 +235,10 @@ describe('<Dropdown.Menu>', () => {
   });
 
   it('Should call onSelect callback with correct `eventKey` once', () => {
-    const selectedValues = [];
+    const onSelectSpy = sinon.spy();
 
     const { getByTestId } = render(
-      <DropdownMenu
-        onSelect={eventKey => {
-          selectedValues.push(eventKey);
-        }}
-      >
+      <DropdownMenu onSelect={onSelectSpy}>
         <DropdownItem data-testid="item-1" eventKey={1}>
           1
         </DropdownItem>
@@ -263,9 +255,7 @@ describe('<Dropdown.Menu>', () => {
       userEvent.click(getByTestId('item-1'));
     });
 
-    userEvent.hover(menuItem);
-
-    expect(menuItem).to.have.class('rs-dropdown-item-focus');
+    expect(onSelectSpy.callCount).to.be.eq(1);
   });
 
   it('Should call onSelect callback with correct `eventKey`', () => {
