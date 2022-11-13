@@ -26,7 +26,7 @@
 
 ### 更多设置
 
-> `layout` 属性可以自定一个分页组件的布局，接收一个数组参数，会根据数组中值的先后顺序进行渲染，`layout` 的默认值为 `['pager']`， 可选值包括: `total`(总条目输区域) 、`pager`(分页区域) 、`limit`(条目选项区域)、`skip`(快捷跳页区域)、`-`(区域占位符，撑满剩余空间) 、`|`(垂直分隔符)。
+`layout` 属性可以自定一个分页组件的布局，接收一个数组参数，会根据数组中值的先后顺序进行渲染，`layout` 的默认值为 `['pager']`， 可选值包括: `total`(总条目输区域) 、`pager`(分页区域) 、`limit`(条目选项区域)、`skip`(快捷跳页区域)、`-`(区域占位符，撑满剩余空间) 、`|`(垂直分隔符)。
 
 <!--{include:`advanced.md`}-->
 
@@ -48,7 +48,7 @@
 | limitOptions  | number[] `([30,50,100])`                                | 每页条数的选择项                                     |
 | linkAs        | ElementType `(button)`                                  | 为组件选项自定义元素类型                             |
 | linkProps     | object                                                  | 为组件选项添加属性                                   |
-| locale        | [PaginationLocaleType](/zh/guide/i18n/#pagination)      | 本地化的文本                                         |
+| locale        | [PaginationLocale](/zh/guide/i18n/#pagination)          | 本地化的文本                                         |
 | maxButtons    | number                                                  | 分页按钮最多显示数                                   |
 | next          | boolean                                                 | 显示下一页                                           |
 | onChangeLimit | (limit:number) => void;                                 | 每页显示的条数改变的回调                             |

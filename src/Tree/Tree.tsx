@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import TreePicker from '../TreePicker';
 import TreeContext from './TreeContext';
 import { StandardProps, ItemDataType, RsRefForwardingComponent } from '../@types/common';
-import { ListProps } from 'react-virtualized/dist/commonjs/List';
+import { ListProps } from '../Windowing';
 
 /**
  * Tree Node Drag Type
@@ -67,11 +67,8 @@ export interface TreeBaseProps<ValueType = string | number, ItemDataType = Recor
   /** Whether using virtualized list */
   virtualized?: boolean;
 
-  /**
-   * List-related properties in `react-virtualized`
-   * https://github.com/bvaughn/react-virtualized/blob/master/docs/List.md#prop-types
-   */
-  listProps?: ListProps;
+  /** Virtualized List props */
+  listProps?: Partial<ListProps>;
 
   /** Expand all nodes By default */
   defaultExpandAll?: boolean;

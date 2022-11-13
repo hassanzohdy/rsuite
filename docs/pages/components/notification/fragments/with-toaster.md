@@ -1,12 +1,26 @@
 <!--start-code-->
 
 ```js
+import {
+  Notification,
+  useToaster,
+  Placeholder,
+  Uploader,
+  ButtonToolbar,
+  SelectPicker,
+  Button
+} from 'rsuite';
+
 const App = () => {
   const [type, setType] = React.useState('info');
   const [placement, setPlacement] = React.useState('topStart');
+  const toaster = useToaster();
+
   const message = (
     <Notification type={type} header={type} closable>
-      <Paragraph width={320} rows={3} />
+      <Placeholder.Paragraph style={{ width: 320 }} rows={3} />
+      <hr />
+      <Uploader action="#" />
     </Notification>
   );
 
@@ -47,7 +61,7 @@ const App = () => {
   );
 };
 
-ReactDOM.render(<App />);
+ReactDOM.render(<App />, document.getElementById('root'));
 ```
 
 <!--end-code-->

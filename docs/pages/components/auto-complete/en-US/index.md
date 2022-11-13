@@ -8,11 +8,11 @@ Autocomplete function of input field.
 
 ## Examples
 
-### Default
+### Basic
 
 <!--{include:`basic.md`}-->
 
-### Autocomplete
+### Autocomplete suffix
 
 <!--{include:`email.md`}-->
 

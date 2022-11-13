@@ -1,6 +1,8 @@
 <!--start-code-->
 
 ```js
+import { Radio, RadioGroup, Form } from 'rsuite';
+
 const styles = {
   radioGroupLabel: {
     padding: '8px 2px 8px 10px',
@@ -9,7 +11,7 @@ const styles = {
   }
 };
 
-const instance = (
+const App = () => (
   <Form.Group controlId="radioList">
     <RadioGroup name="radioList" inline appearance="picker" defaultValue="A">
       <Radio value="A">Item A</Radio>
@@ -24,12 +26,13 @@ const instance = (
     <RadioGroup name="radioList" inline appearance="picker" defaultValue="A">
       <span style={styles.radioGroupLabel}>Status: </span>
       <Radio value="A">All</Radio>
-      <Radio value="B">Enbaled</Radio>
+      <Radio value="B">Enabled</Radio>
       <Radio value="C">Disabled</Radio>
     </RadioGroup>
   </Form.Group>
 );
-ReactDOM.render(instance);
+
+ReactDOM.render(<App />, document.getElementById('root'));
 ```
 
 <!--end-code-->

@@ -7,6 +7,9 @@ import { useClassNames } from '../utils';
 import { TypeAttributes, FormControlBaseProps, WithAsProps } from '../@types/common';
 import FormContext, { FormValueContext } from '../Form/FormContext';
 import { FormGroupContext } from '../FormGroup/FormGroup';
+import { useWillUnmount } from '../utils';
+import useRegisterModel from './useRegisterModel';
+import type { CheckType } from 'schema-typed';
 
 /**
  * Props that FormControl passes to its accepter
@@ -48,6 +51,12 @@ export interface FormControlProps<P = any, ValueType = any>
 
   /** Asynchronous check value */
   checkAsync?: boolean;
+
+  /** Remove field value and error message when component is unmounted  */
+  shouldResetWithUnmount?: boolean;
+
+  /** Validation rule */
+  rule?: CheckType<unknown, any>;
 }
 
 interface FormControlComponent extends React.FC<FormControlProps> {
@@ -64,10 +73,14 @@ const FormControl: FormControlComponent = React.forwardRef((props: FormControlPr
     errorFromContext,
     formDefaultValue = {},
     formError,
+    removeFieldValue,
+    removeFieldError,
+    pushFieldRule,
+    removeFieldRule,
     onFieldChange,
     onFieldError,
     onFieldSuccess,
-    model,
+    getCombinedModel,
     checkTrigger: contextCheckTrigger
   } = useContext(FormContext);
 
@@ -75,7 +88,6 @@ const FormControl: FormControlComponent = React.forwardRef((props: FormControlPr
     as: Component = 'div',
     accepter: AccepterComponent = Input,
     classPrefix = 'form-control',
-    className,
     checkAsync,
     checkTrigger,
     errorPlacement = 'bottomStart',
@@ -88,6 +100,8 @@ const FormControl: FormControlComponent = React.forwardRef((props: FormControlPr
     onChange,
     onBlur,
     defaultValue,
+    shouldResetWithUnmount = false,
+    rule,
     ...rest
   } = props;
 
@@ -100,12 +114,21 @@ const FormControl: FormControlComponent = React.forwardRef((props: FormControlPr
     `);
   }
 
+  useRegisterModel(name, pushFieldRule, removeFieldRule, rule);
+
+  useWillUnmount(() => {
+    if (shouldResetWithUnmount) {
+      removeFieldValue?.(name);
+      removeFieldError?.(name);
+    }
+  });
+
   const trigger = checkTrigger || contextCheckTrigger;
   const formValue = useContext(FormValueContext);
   const val = isUndefined(value) ? formValue?.[name] : value;
 
-  const { withClassPrefix, prefix, merge } = useClassNames(classPrefix);
-  const classes = merge(className, withClassPrefix('wrapper'));
+  const { withClassPrefix, prefix } = useClassNames(classPrefix);
+  const classes = withClassPrefix('wrapper');
 
   const handleFieldChange = (value: any, event: React.SyntheticEvent) => {
     handleFieldCheck(value, trigger === 'change');
@@ -132,7 +155,7 @@ const FormControl: FormControlComponent = React.forwardRef((props: FormControlPr
     };
 
     const nextFormValue = { ...formValue, [name]: value };
-
+    const model = getCombinedModel();
     if (checkAsync) {
       return model?.checkForFieldAsync(name, nextFormValue).then(checkResult => {
         return callbackEvents(checkResult);

@@ -3,7 +3,7 @@
  * Run all tests: `npm run tdd`
  * Run all styles tests: `M=styles npm run tdd`
  * Run a component test: `M=Button npm run tdd`
- * Run a test of a file: `src/Picker/test/PickerToggleSpec.js npm run tdd`
+ * Run a test of a file: `F=src/Picker/test/PickerToggleSpec.js npm run tdd`
  */
 
 /**
@@ -42,6 +42,11 @@ module.exports = config => {
     preprocessors: {
       'test/setupTests.js': ['webpack'],
       'src/**/*Spec.js': ['webpack']
+    },
+    client: {
+      mocha: {
+        timeout: 10000 // default 2000
+      }
     },
     webpack: require('./webpack.karma.js'),
     webpackMiddleware: {

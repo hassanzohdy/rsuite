@@ -1,6 +1,8 @@
 <!--start-code-->
 
 ```js
+import { Dropdown, ButtonToolbar } from 'rsuite';
+
 const SizeDropdown = props => (
   <Dropdown appearance="default" {...props}>
     <Dropdown.Item>New File</Dropdown.Item>
@@ -12,7 +14,8 @@ const SizeDropdown = props => (
     <Dropdown.Item>About</Dropdown.Item>
   </Dropdown>
 );
-const instance = (
+
+const App = () => (
   <ButtonToolbar>
     <SizeDropdown title="Large" size="lg" />
     <SizeDropdown title="Medium" size="md" />
@@ -20,7 +23,8 @@ const instance = (
     <SizeDropdown title="Xsmall" size="xs" />
   </ButtonToolbar>
 );
-ReactDOM.render(instance);
+
+ReactDOM.render(<App />, document.getElementById('root'));
 ```
 
 <!--end-code-->

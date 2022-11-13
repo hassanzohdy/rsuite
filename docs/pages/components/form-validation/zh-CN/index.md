@@ -59,10 +59,20 @@ return (
 
 - `<Form>` 定义一个表单，可以给表单设置 `formValue` 和 `model`，`model` 是由 `Schema.Model` 创建的数据模型。
 - `<Form.Control>` 定义一个 Filed，通过 `name` 属性和 `Schema.Model` 对象的 `key` 对应, 详细参考： 自定义表单组件。
-- `Schema.Model` 定义一个数据模型，详细使用参考 [schema](/zh/components/schema)。
+- `Schema.Model` 定义一个数据模型，详细使用参考 [schema](https://github.com/rsuite/schema-typed#schema-typed)。
 - 自定义触发校验： `<Form>` 实例提供 [check()](#methods) 与 [checkForField()](#methods) 方法，分别用于触发表单校验和字段校验。
 
 <!--{include:`form-check.md`}-->
+
+### Field 级别的校验规则
+
+当 Field 越来越多时，会产生庞大的`model`代码或文件，并且由于在定义在顶层，不够灵活(例如：一个字段的新增和删除，通常还需要在顶层对`model`进行操作)。
+
+这时，Field 级别的校验规则可能是更好的选择，它在组件挂载时添加，组件卸载时删除。
+
+- `<Form.Control>` 通过 `rule` 属性支持添加当前 Field 的校验规则。
+
+<!--{include:`form-control-rule.md`}-->
 
 ### 异步校验
 
@@ -85,7 +95,7 @@ return (
 
 ### 与第三方 input 库的整合
 
-有时候需要额外开发自定义的表单输入组件或者兼容第三方组件，例如 [react-text-mask](https://github.com/text-mask/text-mask)。
+有时候需要额外开发自定义的表单输入组件或者兼容第三方组件，例如 [react-select](https://github.com/JedWatson/react-select)。
 
 <!--{include:`custom-third-party-libraries.md`}-->
 

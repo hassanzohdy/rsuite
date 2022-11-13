@@ -1,6 +1,8 @@
 <!--start-code-->
 
 ```js
+import { FlexboxGrid, SelectPicker, Toggle, MaskedInput } from 'rsuite';
+
 const options = [
   {
     name: 'Date',
@@ -80,7 +82,7 @@ const placeholderChars = [
   }
 ];
 
-const Row = ({ label, control, ...rest }) => (
+const ControlRow = ({ label, control, ...rest }) => (
   <FlexboxGrid {...rest} style={{ marginBottom: 10 }} align="middle">
     <FlexboxGrid.Item colspan={6}>{label}: </FlexboxGrid.Item>
     <FlexboxGrid.Item colspan={18}>{control}</FlexboxGrid.Item>
@@ -96,13 +98,14 @@ const App = () => {
   const [showMask, setShowMask] = React.useState(false);
 
   return (
-    <div>
-      <Row
+    <>
+      <ControlRow
         label="Mask"
         control={
           <SelectPicker
             defaultValue={option.name}
             cleanable={false}
+            searchable={false}
             data={options}
             labelKey="name"
             valueKey="name"
@@ -114,12 +117,13 @@ const App = () => {
           />
         }
       />
-      <Row
+      <ControlRow
         label="Placeholder character"
         control={
           <SelectPicker
             value={placeholderChar}
             cleanable={false}
+            searchable={false}
             data={placeholderChars}
             onChange={setPlaceholderChar}
             style={{ width: 200 }}
@@ -127,14 +131,14 @@ const App = () => {
         }
       />
 
-      <Row label="Guide" control={<Toggle checked={guide} onChange={setGuide} />} />
+      <ControlRow label="Guide" control={<Toggle checked={guide} onChange={setGuide} />} />
 
-      <Row
+      <ControlRow
         label="Keep character positions"
         control={<Toggle checked={keepCharPositions} onChange={setKeepCharPositions} />}
       />
 
-      <Row
+      <ControlRow
         label="Show mask"
         control={
           <Toggle
@@ -163,10 +167,11 @@ const App = () => {
         style={{ width: 300 }}
         onChange={setValue}
       />
-    </div>
+    </>
   );
 };
-ReactDOM.render(<App />);
+
+ReactDOM.render(<App />, document.getElementById('root'));
 ```
 
 <!--end-code-->

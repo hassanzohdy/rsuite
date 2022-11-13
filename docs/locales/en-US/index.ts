@@ -10,6 +10,7 @@ export default {
     design: 'Design',
     components: 'Components',
     resources: 'Resources & Tools',
+    templates: 'Templates',
     designResources: 'Design Resources',
     introduction: 'Introduction',
     usage: 'Quick Start',
@@ -45,12 +46,18 @@ export default {
     shareTwitter: 'Share on Twitter',
     accessibility: 'Accessibility',
     composition: 'Composition',
+    performance: 'Optimizing Performance',
     examples: 'Example Projects',
     searchComponents: 'Search in components',
     theme: 'Theme',
     light: 'Light',
     dark: 'Dark',
-    highContrast: 'High contrast'
+    highContrast: 'High contrast',
+    showTheSource: 'Show the source',
+    transparentBackground: 'Transparent background',
+    seeTheSourceOnGitHub: 'See the source on GitHub',
+    openCodeSandbox: 'Open in CodeSandbox',
+    openStackBlitz: 'Open in StackBlitz'
   },
   resourcesDesign: {
     defaultHeader: 'Design - Light theme',
@@ -61,5 +68,21 @@ export default {
     figmaDescription: 'Open source library that can be used directly on Figma.',
     sketchHeader: 'Sketch Symbols',
     sketchDescription: 'Provide symbols imported by Sketch.'
+  },
+  resourcesIcons: {
+    searchNoResults: 'No results for',
+    tryOther: 'Try using the following icons:'
+  },
+  extensions: {
+    '@rsuite/charts': 'A set of charts based on rsuite and echarts.',
+    '@rsuite/schema-form': 'Form generation and validation based on schema-typed and rsuite.',
+    '@rsuite/responsive-nav': 'A responsive navigation component.',
+    '@rsuite/react-frame': 'Management system layout framework based on rsuite UI.',
+    '@rsuite/multi-date-picker': 'A date picker that can select multiple dates.',
+    '@rsuite/document-nav':
+      'Document navigation is automatically generated based on the HTML title (h1-h6) tag.',
+    '@rsuite/timezone-picker': 'Time zone selector based on rsuite UI. ',
+    'rsuite-color-picker': 'Package a color picker extension that can select color for rsuite.',
+    '@rsuite/formik': 'Formik-compatible React Suite form components'
   }
 };

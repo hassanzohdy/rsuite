@@ -1,6 +1,6 @@
 import React from 'react';
 import { expectType } from 'ts-expect';
-import { PickerInstance } from '../../Picker';
+import { PickerHandle } from '../../Picker';
 import CheckPicker from '../CheckPicker';
 
 // Infer value and onChange types from data
@@ -32,6 +32,11 @@ const stringValuedData = [{ label: 'One', value: 'One' }];
   }}
 />;
 
-const pickerRef = React.createRef<PickerInstance>();
+const pickerRef = React.createRef<PickerHandle>();
 
 <CheckPicker ref={pickerRef} data={[]} />;
+
+// With a label
+<CheckPicker label="User" data={[]} />;
+
+<CheckPicker caretAs={() => <div />} data={[]} />;

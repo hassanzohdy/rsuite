@@ -9,7 +9,7 @@ When the mouse clicks/moves in, the pop-up pop-up box is used to display more co
 
 <!--{include:(components/popover/fragments/import.md)}-->
 
-## Examples
+## Basic
 
 ### Default
 
@@ -44,17 +44,29 @@ Positioned popover components in scrolling container
 
 <!--{include:`with-dropdown.md`}-->
 
-## Props
+### Hide arrow indicator
 
-<!--{include:(_common/types/placement-all.md)}-->
+You can hide arrow indicator by setting `arrow` props to `false`;
+
+<!--{include:`arrow.md`}-->
+
+### Follow cursor
+
+You can enable the `Popover` to follow the cursor by setting `followCursor={true}`.
+
+<!--{include:`follow-cursor.md`}-->
+
+## Props
 
 ### `<Popover>`
 
 | Property    | Type `(Default)`     | Description                            |
 | ----------- | -------------------- | -------------------------------------- |
+| arrow       | boolean `(true)`     | Whether show the arrow indicator       |
 | children \* | ReactNode            | The content of the component.          |
 | classPrefix | string `('popover')` | The prefix of the component CSS class. |
 | title       | ReactNode            | The title of the component.            |
 | visible     | boolean              | The component is visible by default.   |
 
 <!--{include:(components/whisper/en-US/props.md)}-->
+<!--{include:(_common/types/placement-all.md)}-->

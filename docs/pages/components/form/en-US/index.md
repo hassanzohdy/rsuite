@@ -17,7 +17,7 @@ A set of components and models that process form data.
 
 ---
 
-### Default
+### Basic
 
 The default is the vertical layout
 
@@ -114,7 +114,7 @@ HTML:
 | onChange         | (formValue: object, event) => void                            | Callback fired when data changing                                                                          |
 | onCheck          | (formError: object) => void                                   | Callback fired when data cheking                                                                           |
 | onError          | (formError: object) => void                                   | Callback fired when error checking                                                                         |
-| plaintext        | boolean `(false)`                                             | Render the form as plain text 本                                                                           |
+| plaintext        | boolean `(false)`                                             | Render the form as plain text                                                                              |
 | readOnly         | boolean `(false)`                                             | Make the form readonly                                                                                     |
 
 ### Form methods
@@ -172,17 +172,19 @@ cleanErrorForField: (fieldName: keyof E, callback?: () => void) => void;
 
 ### `<Form.Control>`
 
-| Property       | Type`(default)`                                       | Description                                                                      |
-| -------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------- |
-| accepter       | ElementType `(Input)`                                 | Proxied components                                                               |
-| checkAsync     | boolean                                               | Asynchronous check value                                                         |
-| checkTrigger   | 'change' &#124; 'blur' &#124; 'none'                  | The data validation trigger type, and it wiill overrides the setting on `<Form>` |
-| classPrefix    | string `('form-control')`                             | The prefix of the component CSS class                                            |
-| errorMessage   | ReactNode                                             | Show error messages                                                              |
-| errorPlacement | [Placement](#code-ts-placement-code)`('bottomStart')` | The placement of error messages                                                  |
-| name \*        | string                                                | The name of form-control                                                         |
-| plaintext      | boolean                                               | Make the control plaintext                                                       |
-| readOnly       | boolean                                               | Make the control readonly                                                        |
+| Property               | Type`(default)`                                       | Description                                                                                                                                                                  |
+| ---------------------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| accepter               | ElementType `(Input)`                                 | Proxied components                                                                                                                                                           |
+| checkAsync             | boolean                                               | Asynchronous check value                                                                                                                                                     |
+| checkTrigger           | 'change' &#124; 'blur' &#124; 'none'                  | The data validation trigger type, and it wiill overrides the setting on `<Form>`                                                                                             |
+| classPrefix            | string `('form-control')`                             | The prefix of the component CSS class                                                                                                                                        |
+| errorMessage           | ReactNode                                             | Show error messages                                                                                                                                                          |
+| errorPlacement         | [Placement](#code-ts-placement-code)`('bottomStart')` | The placement of error messages                                                                                                                                              |
+| name \*                | string                                                | The name of form-control                                                                                                                                                     |
+| plaintext              | boolean                                               | Make the control plaintext                                                                                                                                                   |
+| readOnly               | boolean                                               | Make the control readonly                                                                                                                                                    |
+| rule                   | checkType                                             | Current field verification rule. If it conflicts with the `<Form>`'s `model`, it get higher priority, [example](/components/form-validation/#field-level-verification-rules) |
+| shouldResetWithUnmount | boolean`('false')`                                    | Remove field value and error message when component is unmounted                                                                                                             |
 
 ### `<Form.Group>`
 
@@ -211,7 +213,7 @@ cleanErrorForField: (fieldName: keyof E, callback?: () => void) => void;
 | Property    | Type`(default)`                                       | Description                           |
 | ----------- | ----------------------------------------------------- | ------------------------------------- |
 | classPrefix | string `('form-error-message')`                       | The prefix of the component CSS class |
-| show        | boolean                                               | Whether to display error message      |
 | placement   | [Placement](#code-ts-placement-code)`('bottomStart')` | The placement of error messages       |
+| show        | boolean                                               | Whether to display error message      |
 
 <!--{include:(_common/types/placement8.md)}-->

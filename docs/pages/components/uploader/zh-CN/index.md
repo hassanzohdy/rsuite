@@ -56,6 +56,8 @@
 
 ### `<Uploader>`
 
+继承 [Button](/zh/components/button/) 组件的 Props。
+
 | 属性名称           | 类型 `(默认值)`                                                                                                              | 描述                                                                                                                          |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | accept             | string                                                                                                                       | 接受上传的文件类型，详见：[HTML attribute: accept](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/accept)       |
@@ -74,6 +76,7 @@
 | listType           | menu: 'text' , 'picture-text' , 'picture' `('text')`                                                                         | 上传列表的样式                                                                                                                |
 | locale             | [UploaderLocaleType](/zh/guide/i18n/#uploader)                                                                               | 本地化的文本                                                                                                                  |
 | maxPreviewFileSize | number `(5242880)`                                                                                                           | 设置预览文件最大限制                                                                                                          |
+| method             | string `('POST')`                                                                                                            | 上传请求的 http method                                                                                                        |
 | multiple           | boolean                                                                                                                      | 允许一次选择多个文件上传                                                                                                      |
 | name               | string `('file')`                                                                                                            | 上传对应文件的参数名                                                                                                          |
 | onChange           | (fileList: [FileType][file][]) => void                                                                                       | 上传队列发生改变的回调函数                                                                                                    |
@@ -86,11 +89,11 @@
 | onUpload           | (file: [FileType][file]) => void                                                                                             | 上传文件开始的回调函数                                                                                                        |
 | removable          | boolean `(true)`                                                                                                             | 允许删除上传列表中的文件                                                                                                      |
 | renderFileInfo     | (file: [FileType][file], fileElement: ReactNode) => ReactNode                                                                | 自定义渲染文件信息                                                                                                            |
-| renderThumbnail    | (file: [FileType][file], thumbnail: React.ReactNode) => React.ReactNode                                                      | 自定义渲染缩略图                                                                                                              |
+| renderThumbnail    | (file: [FileType][file], thumbnail: ReactNode) => ReactNode                                                                  | 自定义渲染缩略图                                                                                                              |
 | shouldQueueUpdate  | (fileList: [FileType][file][], newFile: [FileType][file][] &#124; [FileType][file]) => boolean &#124; Promise&lt;boolean&gt; | 允许更新队列。在选择文件后，更新上传文件队列前的校验函数，返回 false 则不更新                                                 |
 | shouldUpload       | (file: [FileType][file]) => boolean &#124; Promise&lt;boolean&gt;                                                            | 允许上传文件。在文件上传前的的校验函数，返回 false 则不上传                                                                   |
 | timeout            | number                                                                                                                       | 设置上传超时                                                                                                                  |
-| toggleAs           | ElementType `('button')`                                                                                                     | 为组件自定义元素类型                                                                                                          |
+| toggleAs           | ElementType ([Button](/zh/components/button/))                                                                               | 为组件自定义元素类型                                                                                                          |
 | withCredentials    | boolean                                                                                                                      | 上传请求时是否携带 cookie                                                                                                     |
 
 <!--{include:(_common/types/file-type.md)}-->

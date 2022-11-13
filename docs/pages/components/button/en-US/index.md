@@ -13,7 +13,7 @@ Commonly used operating buttons, button combinations, button layouts.
 
 ## Examples
 
-### Default
+### Basic
 
 <!--{include:`basic.md`}-->
 
@@ -90,6 +90,18 @@ This is generally applicable to flow layouts, or to full rows at the top and bot
 The buttons are laid out horizontally in the button set and are equally wide.
 
 <!--{include:`justified.md`}-->
+
+## Accessing DOM
+
+The underlying `<button>` element is accessible via `ref` attribute of `Button`.
+
+```tsx
+function App() {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  return <Button ref={buttonRef}>Text</Button>;
+}
+```
 
 ## Props
 

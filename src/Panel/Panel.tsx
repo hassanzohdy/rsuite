@@ -74,8 +74,11 @@ const Panel: RsRefForwardingComponent<'div', PanelProps> = React.forwardRef(
       ...rest
     } = props;
     const { merge, prefix, withClassPrefix } = useClassNames(classPrefix);
-    const [expandedState, setExpanded] = useControlled(expandedProp, defaultExpanded);
     const { accordion, activeKey, onGroupSelect } = useContext(PanelGroupContext) || {};
+    const [expandedState, setExpanded] = useControlled(
+      expandedProp,
+      defaultExpanded || (typeof activeKey !== 'undefined' && activeKey === eventKey)
+    );
 
     let collapsible = collapsibleProp;
     let headerRole = headerRoleProp;
@@ -84,7 +87,11 @@ const Panel: RsRefForwardingComponent<'div', PanelProps> = React.forwardRef(
     if (accordion) {
       collapsible = true;
       headerRole = 'button';
-      expanded = typeof activeKey !== 'undefined' ? activeKey === eventKey : expanded;
+
+      // Collapses all inactive panels.
+      if (typeof activeKey !== 'undefined' && activeKey !== eventKey) {
+        expanded = false;
+      }
     }
 
     const handleSelect = useCallback(
@@ -139,22 +146,18 @@ const Panel: RsRefForwardingComponent<'div', PanelProps> = React.forwardRef(
       if (!header) {
         return null;
       }
-      let content: React.ReactNode;
+
+      let panelTitleElement: React.ReactNode;
 
       if (!React.isValidElement(header) || Array.isArray(header)) {
-        content = collapsible ? (
-          <>
-            <AngleDownIcon rotate={expanded ? 180 : 0} />
-            <span className={prefix('title')} role="presentation">
-              <span className={expanded ? undefined : 'collapsed'}>{header}</span>
-            </span>
-          </>
-        ) : (
-          header
+        panelTitleElement = (
+          <span className={prefix('title')} role="presentation">
+            <span className={expanded ? undefined : 'collapsed'}>{header}</span>
+          </span>
         );
       } else {
         const className = merge(prefix('title'), get(header, 'props.className'));
-        content = React.cloneElement<any>(header, { className });
+        panelTitleElement = React.cloneElement<any>(header, { className });
       }
 
       return (
@@ -166,7 +169,8 @@ const Panel: RsRefForwardingComponent<'div', PanelProps> = React.forwardRef(
           onClick={collapsible ? handleSelect : undefined}
           tabIndex={-1}
         >
-          {content}
+          {panelTitleElement}
+          {collapsible && <AngleDownIcon rotate={expanded ? 180 : 0} data-testid="caret icon" />}
         </div>
       );
     };

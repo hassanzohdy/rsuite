@@ -1,9 +1,11 @@
 <!--start-code-->
 
 ```js
+import { Form, ButtonToolbar, Button, Input, InputGroup, InputNumber } from 'rsuite';
+
 const Textarea = React.forwardRef((props, ref) => <Input {...props} as="textarea" ref={ref} />);
 
-const instance = (
+const App = () => (
   <Form fluid>
     <Form.Group controlId="name-1">
       <Form.ControlLabel>Username</Form.ControlLabel>
@@ -23,6 +25,17 @@ const instance = (
       <Form.ControlLabel>Textarea</Form.ControlLabel>
       <Form.Control rows={5} name="textarea" accepter={Textarea} />
     </Form.Group>
+    <Form.Group controlId="input-group">
+      <Form.ControlLabel>Input Group</Form.ControlLabel>
+      <InputGroup>
+        <InputGroup.Addon> @</InputGroup.Addon>
+        <Form.Control name="input-group" />
+      </InputGroup>
+    </Form.Group>
+    <Form.Group>
+      <Form.ControlLabel>InputNumber</Form.ControlLabel>
+      <Form.Control name="numder" accepter={InputNumber} />
+    </Form.Group>
     <Form.Group>
       <ButtonToolbar>
         <Button appearance="primary">Submit</Button>
@@ -31,7 +44,8 @@ const instance = (
     </Form.Group>
   </Form>
 );
-ReactDOM.render(instance);
+
+ReactDOM.render(<App />, document.getElementById('root'));
 ```
 
 <!--end-code-->

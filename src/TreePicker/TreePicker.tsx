@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { pick, omit, isUndefined, isNil, isFunction } from 'lodash';
-import { List, AutoSizer, ListInstance, ListRowProps } from '../Picker/VirtualizedList';
+import { List, AutoSizer, ListHandle, ListChildComponentProps } from '../Windowing';
 import TreeNode from './TreeNode';
 import { getTreeNodeIndent } from '../utils/treeUtils';
 import { PickerLocale } from '../locales';
@@ -51,12 +51,13 @@ import {
   onMenuKeyDown,
   usePublicMethods,
   listPickerPropTypes,
-  OverlayTriggerInstance,
+  OverlayTriggerHandle,
   pickTriggerPropKeys,
   omitTriggerPropKeys,
   PositionChildProps,
   PickerComponent,
-  useToggleKeyDownEvent
+  useToggleKeyDownEvent,
+  PickerToggleProps
 } from '../Picker';
 
 import { TreeDragProps, TreeBaseProps, DropData } from '../Tree/Tree';
@@ -64,13 +65,11 @@ import { FormControlPickerProps, ItemDataType } from '../@types/common';
 
 import TreeContext from '../Tree/TreeContext';
 
-// default value for virtualized
-export const maxTreeHeight = 320;
-
 export interface TreePickerProps<T = number | string>
   extends TreeBaseProps<T, ItemDataType>,
     TreeDragProps,
-    FormControlPickerProps<T, PickerLocale, ItemDataType> {
+    FormControlPickerProps<T, PickerLocale, ItemDataType>,
+    Pick<PickerToggleProps, 'caretAs'> {
   /** The height of Dropdown */
   height?: number;
 
@@ -104,6 +103,7 @@ export interface TreePickerProps<T = number | string>
 }
 
 const emptyArray = [];
+const itemSize = () => 36;
 
 const TreePicker: PickerComponent<TreePickerProps> = React.forwardRef((props, ref) => {
   const {
@@ -115,11 +115,12 @@ const TreePicker: PickerComponent<TreePickerProps> = React.forwardRef((props, re
     value: controlledValue,
     locale: overrideLocale,
     height = 360,
+    menuMaxHeight = 320,
+    menuStyle,
     className,
     disabled,
     placement = 'bottomStart',
     cleanable = true,
-    menuStyle,
     searchable = true,
     virtualized = false,
     classPrefix = 'picker',
@@ -164,9 +165,9 @@ const TreePicker: PickerComponent<TreePickerProps> = React.forwardRef((props, re
     renderValue,
     ...rest
   } = props;
-  const triggerRef = useRef<OverlayTriggerInstance>(null);
+  const triggerRef = useRef<OverlayTriggerHandle>(null);
   const targetRef = useRef<HTMLButtonElement>(null);
-  const listRef = useRef<ListInstance>(null);
+  const listRef = useRef<ListHandle>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const treeViewRef = useRef<HTMLDivElement>(null);
@@ -630,13 +631,15 @@ const TreePicker: PickerComponent<TreePickerProps> = React.forwardRef((props, re
       const nullValue: any = null;
       const target = event.target as Element;
       // exclude searchBar
-      if (target.matches('div[role="searchbox"] > input')) {
+      if (target.matches('div[role="searchbox"] > input') || disabled || !cleanable) {
         return;
       }
-      setValue(null);
+      if (!isControlled) {
+        setValue(null);
+      }
       onChange?.(nullValue, event);
     },
-    [onChange, setValue]
+    [cleanable, disabled, onChange, setValue, isControlled]
   );
 
   const onPickerKeydown = useToggleKeyDownEvent({
@@ -732,32 +735,26 @@ const TreePicker: PickerComponent<TreePickerProps> = React.forwardRef((props, re
     );
   };
 
-  const renderVirtualListNode =
-    (nodes: any[]) =>
-    ({ key, index, style }: ListRowProps) => {
-      const node = nodes[index];
-      const { layer, visible } = node;
+  const renderVirtualListNode = ({ index, style, data }: ListChildComponentProps) => {
+    const node = data[index];
+    const { layer, visible } = node;
 
-      const expand = getExpandWhenSearching(
-        searchKeywordState,
-        expandItemValues.includes(node[valueKey])
-      );
-      if (!node.visible) {
-        return null;
-      }
+    const expand = getExpandWhenSearching(
+      searchKeywordState,
+      expandItemValues.includes(node[valueKey])
+    );
+    if (!node.visible) {
+      return null;
+    }
 
-      const nodeProps = {
-        ...getTreeNodeProps({ ...node, expand }, layer),
-        style,
-        hasChildren: node.hasChildren
-      };
-
-      return (
-        visible && (
-          <TreeNode ref={ref => saveTreeNodeRef(ref, node.refKey)} key={key} {...nodeProps} />
-        )
-      );
+    const nodeProps = {
+      ...getTreeNodeProps({ ...node, expand }, layer),
+      style,
+      hasChildren: node.hasChildren
     };
+
+    return visible && <TreeNode ref={ref => saveTreeNodeRef(ref, node.refKey)} {...nodeProps} />;
+  };
 
   const renderTree = () => {
     const classes = withTreeClassPrefix({
@@ -779,20 +776,20 @@ const TreePicker: PickerComponent<TreePickerProps> = React.forwardRef((props, re
         <div className={treePrefix('nodes')}>
           {virtualized ? (
             <AutoSizer
-              defaultHeight={inline ? height : maxTreeHeight}
+              defaultHeight={inline ? height : menuMaxHeight}
               style={{ width: 'auto', height: 'auto' }}
             >
-              {({ height, width }) => (
+              {({ height }) => (
                 <List
                   ref={listRef}
-                  width={width}
                   height={height}
-                  rowHeight={36}
-                  rowCount={formattedNodes.length}
-                  rowRenderer={renderVirtualListNode(formattedNodes)}
-                  scrollToAlignment="center"
+                  itemSize={itemSize}
+                  itemCount={formattedNodes.length}
+                  itemData={formattedNodes}
                   {...listProps}
-                />
+                >
+                  {renderVirtualListNode}
+                </List>
               )}
             </AutoSizer>
           ) : (
@@ -807,13 +804,12 @@ const TreePicker: PickerComponent<TreePickerProps> = React.forwardRef((props, re
     const { left, top, className } = positionProps;
     const classes = merge(className, menuClassName, prefix('tree-menu'));
     const mergedMenuStyle = { ...menuStyle, left, top };
-    const styles = virtualized ? { height, ...mergedMenuStyle } : { ...mergedMenuStyle };
 
     return (
       <PickerOverlay
         autoWidth={menuAutoWidth}
         className={classes}
-        style={styles}
+        style={mergedMenuStyle}
         ref={mergeRefs(overlayRef, speakerRef)}
         onKeyDown={onPickerKeydown}
         target={triggerRef}

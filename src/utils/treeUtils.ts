@@ -8,8 +8,9 @@ import { ItemDataType } from '../@types/common';
 import { TreePickerProps } from '../TreePicker/TreePicker';
 import { shouldDisplay } from '../Picker';
 import reactToString from './reactToString';
-import { ListInstance } from '../Picker/VirtualizedList';
+import { ListHandle } from '../Windowing';
 import { TREE_NODE_PADDING, TREE_NODE_ROOT_PADDING } from './constants';
+import { attachParent } from './attachParent';
 
 type PartialTreeProps = Partial<TreePickerProps | CheckTreePickerProps>;
 
@@ -51,9 +52,8 @@ export function flattenTree(
 
     data.forEach((item: any, index: number) => {
       const node: any = typeof executor === 'function' ? executor(item, index) : item;
-      node.parent = parent;
 
-      flattenData.push({ ...node });
+      flattenData.push(attachParent(node, parent));
 
       if (item[childrenKey]) {
         traverse(item[childrenKey], item);
@@ -643,20 +643,25 @@ export function useFlattenTreeData({
     dispatch(Object.create(null));
   }, [dispatch]);
 
-  const { current: flattenNodes = {} } = useRef<TreeNodesType>({});
+  const flattenNodes = useRef<TreeNodesType>({});
 
   const flattenTreeData = useCallback(
-    (treeData: TreeNodeType[], ref: string, parent?: TreeNodeType, layer = 1) => {
+    (treeData: TreeNodeType[], parent?: TreeNodeType, layer = 1) => {
       if (!Array.isArray(treeData) || treeData.length === 0) {
         return [];
       }
 
-      treeData.map((node, index) => {
-        const refKey = `${ref}-${index}`;
-
+      treeData.map(node => {
+        const value = node[valueKey];
+        /**
+         * because the value of the node's type is string or number,
+         * so it can used as the key of the object directly
+         * to avoid number value is converted to string. 1 and '1' will be convert to '1'
+         *  we used `String_` or `Number_` prefix
+         */
+        const refKey = getNodeFormattedRefKey(value);
         node.refKey = refKey;
-
-        flattenNodes[refKey] = {
+        flattenNodes.current[refKey] = {
           layer,
           [labelKey]: node[labelKey],
           [valueKey]: node[valueKey],
@@ -666,14 +671,14 @@ export function useFlattenTreeData({
           ...node
         };
         if (parent) {
-          flattenNodes[refKey].parent = omit(parent, 'parent', 'children');
+          flattenNodes.current[refKey].parent = omit(parent, 'parent', 'children');
         }
-        flattenTreeData(node[childrenKey], refKey, node, layer + 1);
+        flattenTreeData(node[childrenKey], node, layer + 1);
       });
 
-      callback?.(flattenNodes);
+      callback?.(flattenNodes.current);
     },
-    [childrenKey, valueKey, labelKey, callback, uncheckableItemValues, flattenNodes]
+    [childrenKey, valueKey, labelKey, callback, uncheckableItemValues]
   );
 
   const serializeListOnlyParent = useCallback(
@@ -778,12 +783,14 @@ export function useFlattenTreeData({
   };
 
   useEffect(() => {
-    flattenTreeData(data, '0');
+    // when data is changed, should clear the flattenNodes, avoid duplicate keys
+    flattenNodes.current = {};
+    flattenTreeData(data);
   }, [data]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
     forceUpdate,
-    flattenNodes,
+    flattenNodes: flattenNodes.current,
     flattenTreeData,
     serializeListOnlyParent,
     unSerializeList,
@@ -923,7 +930,7 @@ export interface FocusToTreeNodeProps {
   activeNode: any;
   virtualized: boolean;
   container: HTMLElement | null;
-  list: ListInstance;
+  list: ListHandle;
   formattedNodes: TreeNodeType[];
 }
 
@@ -973,4 +980,13 @@ export function getTreeNodeIndent(rtl, layer, absolute = false) {
   return {
     [rtl ? 'paddingRight' : 'paddingLeft']: offset
   };
+}
+
+/**
+ * according to the value type to get the formatted valueKey of the node
+ * @param value
+ * @returns
+ */
+export function getNodeFormattedRefKey(value: string | number) {
+  return `${typeof value === 'number' ? 'Number_' : 'String_'}${value}`;
 }

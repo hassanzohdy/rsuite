@@ -1,3 +1,4 @@
+import warnOnce from '../src/utils/warnOnce';
 import './chai-assertions.js';
 
 /**
@@ -40,7 +41,11 @@ window.addEventListener('unhandledrejection', event => {
 
 // Ensure that uncaught exceptions between tests result in the tests failing.
 afterEach(() => {
+  sinon.restore();
+
   if (pendingError) {
     throw pendingError;
   }
+
+  warnOnce._resetWarned();
 });

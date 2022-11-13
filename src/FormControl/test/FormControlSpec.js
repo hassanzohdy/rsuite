@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ReactTestUtils from 'react-dom/test-utils';
-import { render } from '@testing-library/react';
-
+import { render, fireEvent, screen } from '@testing-library/react';
 import { getDOMNode } from '@test/testUtils';
 import Form from '../../Form';
 import FormControl from '../FormControl';
 import FormGroup from '../../FormGroup';
+import Schema from '../../Schema';
 
 describe('FormControl', () => {
   it('Should output a input', () => {
@@ -79,14 +79,14 @@ describe('FormControl', () => {
     ReactTestUtils.Simulate.blur(instance.querySelector('input'));
   });
 
-  it('Should have a custom className', () => {
-    const instance = getDOMNode(
+  it('Should apply custom className to accepter component', () => {
+    render(
       <Form>
-        <FormControl className="custom" name="username" />
+        <FormControl className="custom" name="username" data-testid="input" />
       </Form>
     );
 
-    assert.include(instance.querySelector('.rs-form-control').className, 'custom');
+    expect(screen.getByTestId('input')).to.have.class('custom');
   });
 
   it('Should have a custom style', () => {
@@ -203,5 +203,159 @@ describe('FormControl', () => {
 
     expect(alert).to.exist;
     expect(input).to.have.attr('aria-errormessage', alert.getAttribute('id'));
+  });
+
+  it('Should remove value and error when shouldResetWithUnmount is true', () => {
+    let refValue = { username: '', email: '' };
+    let refError = {};
+    const model = Schema.Model({
+      username: Schema.Types.StringType().maxLength(2, 'The length cannot exceed 2'),
+      email: Schema.Types.StringType().maxLength(2, 'The length cannot exceed 2')
+    });
+    const Wrapper = () => {
+      const [value, setValue] = useState(refValue);
+      const [error, setError] = useState(refError);
+      const handleChange = v => {
+        refValue = v;
+        setValue(v);
+      };
+      const handleError = e => {
+        refError = e;
+        setError(e);
+      };
+
+      const { email } = value;
+      return (
+        <>
+          <Form
+            model={model}
+            onChange={handleChange}
+            onCheck={handleError}
+            formError={error}
+            formValue={value}
+          >
+            {email || <FormControl id="username" name="username" shouldResetWithUnmount />}
+            <FormControl id="email" name="email" />
+          </Form>
+        </>
+      );
+    };
+    const { container } = render(<Wrapper />);
+    fireEvent.change(container.querySelector('#username'), { target: { value: 'username' } });
+    assert.deepEqual(refValue, { username: 'username', email: '' });
+    assert.deepEqual(refError, { username: 'The length cannot exceed 2' });
+    fireEvent.change(container.querySelector('#email'), { target: { value: 'email' } });
+    assert.deepEqual(refValue, { email: 'email' });
+    assert.deepEqual(refError, { email: 'The length cannot exceed 2' });
+  });
+
+  describe('rule', () => {
+    it("should check the field's rule", () => {
+      const formRef = React.createRef();
+      const handleError = sinon.spy();
+
+      render(
+        <Form ref={formRef} onError={handleError}>
+          <FormControl name="items" rule={Schema.Types.StringType().isRequired('require')} />
+        </Form>
+      );
+      formRef.current.check();
+      assert.equal(handleError.callCount, 1);
+      assert.deepEqual(handleError.firstCall.firstArg, { items: 'require' });
+    });
+
+    it('Should not validate fields unmounted with rule', () => {
+      const formRef = React.createRef();
+      const handleError = sinon.spy();
+
+      function Wrapper() {
+        const [show, setShow] = useState(true);
+        return (
+          <>
+            <button
+              onClick={() => {
+                setShow(false);
+              }}
+            >
+              hidden
+            </button>
+            <Form ref={formRef} onError={handleError}>
+              <FormControl name="user" rule={Schema.Types.StringType().isRequired('require')} />
+              {show && (
+                <FormControl
+                  name="password"
+                  rule={Schema.Types.StringType().isRequired('require')}
+                />
+              )}
+            </Form>
+          </>
+        );
+      }
+      const { container } = render(<Wrapper />);
+
+      formRef.current.check();
+      assert.equal(handleError.callCount, 1);
+      assert.deepEqual(handleError.firstCall.firstArg, { user: 'require', password: 'require' });
+
+      fireEvent.click(container.querySelector('button'));
+      formRef.current.check();
+      assert.equal(handleError.callCount, 2);
+      assert.deepEqual(handleError.secondCall.firstArg, { user: 'require' });
+    });
+
+    it("Should validate accurately,when field's rule is dynamic", () => {
+      const formRef = React.createRef();
+      const handleError = sinon.spy();
+
+      function Wrapper() {
+        const [rule, setRule] = useState(Schema.Types.StringType().isRequired('require'));
+        return (
+          <>
+            <button
+              onClick={() => {
+                setRule(Schema.Types.StringType().isRequired('second require'));
+              }}
+            >
+              setRule
+            </button>
+            <Form ref={formRef} onError={handleError}>
+              <FormControl name="user" rule={rule} />
+            </Form>
+          </>
+        );
+      }
+
+      const { container } = render(<Wrapper />);
+
+      formRef.current.check();
+      assert.equal(handleError.callCount, 1);
+      assert.deepEqual(handleError.firstCall.firstArg, { user: 'require' });
+
+      fireEvent.click(container.querySelector('button'));
+      formRef.current.check();
+      assert.equal(handleError.callCount, 2);
+      assert.deepEqual(handleError.secondCall.firstArg, { user: 'second require' });
+    });
+
+    it("Should use the field's rule when both model and field have same name rule", () => {
+      const formRef = React.createRef();
+      const handleError = sinon.spy();
+
+      function Wrapper() {
+        const model = Schema.Model({
+          user: Schema.Types.StringType().isRequired('form require')
+        });
+        return (
+          <Form ref={formRef} model={model} onError={handleError}>
+            <FormControl name="user" rule={Schema.Types.StringType().isRequired('field require')} />
+          </Form>
+        );
+      }
+      render(<Wrapper />);
+
+      formRef.current.check();
+      assert.equal(handleError.callCount, 1);
+      assert.equal(handleError.firstCall.firstArg.user, 'field require');
+    });
   });
 });

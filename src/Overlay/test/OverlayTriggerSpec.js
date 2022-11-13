@@ -1,7 +1,7 @@
 import React from 'react';
-import ReactTestUtils from 'react-dom/test-utils';
+import { Simulate } from 'react-dom/test-utils';
+import { act, fireEvent, render } from '@testing-library/react';
 import { getDOMNode } from '@test/testUtils';
-
 import OverlayTrigger from '../OverlayTrigger';
 import Tooltip from '../../Tooltip';
 
@@ -24,7 +24,7 @@ describe('OverlayTrigger', () => {
         <button>button</button>
       </OverlayTrigger>
     );
-    ReactTestUtils.Simulate.click(whisper);
+    fireEvent.click(whisper);
     assert.equal(document.getElementsByClassName('test-whisper_click').length, 1);
   });
 
@@ -37,7 +37,7 @@ describe('OverlayTrigger', () => {
         <button>button</button>
       </OverlayTrigger>
     );
-    ReactTestUtils.Simulate.contextMenu(whisper);
+    fireEvent.contextMenu(whisper);
     assert.equal(document.getElementsByClassName('test-whisper_context-menu').length, 1);
   });
 
@@ -51,22 +51,25 @@ describe('OverlayTrigger', () => {
       </OverlayTrigger>
     );
 
-    ReactTestUtils.Simulate.focus(whisper);
+    fireEvent.focus(whisper);
     assert.equal(document.getElementsByClassName('test-whisper_focus').length, 1);
   });
 
   it('Should maintain overlay classname when trigger mouseOver and setting [trigger="hover"]', () => {
-    const whisper = getDOMNode(
+    const { getByTestId } = render(
       <OverlayTrigger
         trigger="hover"
-        speaker={<Tooltip className="test-whisper_hover">test</Tooltip>}
+        speaker={<Tooltip data-testid="test-whisper_hover">test</Tooltip>}
       >
-        <button>button</button>
+        <button data-testid="whisper">button</button>
       </OverlayTrigger>
     );
 
-    ReactTestUtils.Simulate.mouseOver(whisper);
-    assert.equal(document.getElementsByClassName('test-whisper_hover').length, 1);
+    act(() => {
+      Simulate.mouseOver(getByTestId('whisper'));
+    });
+
+    expect(getByTestId('test-whisper_hover')).to.exist;
   });
 
   it('Should maintain overlay classname when trigger click and setting [trigger="active"]  ', () => {
@@ -79,7 +82,8 @@ describe('OverlayTrigger', () => {
       </OverlayTrigger>
     );
 
-    ReactTestUtils.Simulate.click(whisper);
+    fireEvent.click(whisper);
+
     assert.equal(document.getElementsByClassName('test-whisper_active').length, 1);
   });
 
@@ -94,7 +98,7 @@ describe('OverlayTrigger', () => {
       </OverlayTrigger>
     );
 
-    ReactTestUtils.Simulate.click(whisper);
+    fireEvent.click(whisper);
   });
 
   it('Should call onContextMenu callback', done => {
@@ -108,7 +112,7 @@ describe('OverlayTrigger', () => {
       </OverlayTrigger>
     );
 
-    ReactTestUtils.Simulate.contextMenu(whisper);
+    fireEvent.contextMenu(whisper);
   });
 
   it('Should call onFocus callback', done => {
@@ -122,7 +126,7 @@ describe('OverlayTrigger', () => {
       </OverlayTrigger>
     );
 
-    ReactTestUtils.Simulate.focus(whisper);
+    fireEvent.focus(whisper);
   });
 
   it('Should call onMouseOver callback', done => {
@@ -136,7 +140,7 @@ describe('OverlayTrigger', () => {
       </OverlayTrigger>
     );
 
-    ReactTestUtils.Simulate.mouseOver(whisper);
+    fireEvent.mouseOver(whisper);
   });
 
   it('Should call onMouseOut callback', done => {
@@ -150,6 +154,82 @@ describe('OverlayTrigger', () => {
       </OverlayTrigger>
     );
 
-    ReactTestUtils.Simulate.mouseOut(whisper);
+    fireEvent.mouseOut(whisper);
+  });
+
+  it('Should call onMouseMove callback', () => {
+    const onMouseMove = sinon.spy();
+
+    const whisper = getDOMNode(
+      <OverlayTrigger onMouseMove={onMouseMove} speaker={<Tooltip />}>
+        <button>button</button>
+      </OverlayTrigger>
+    );
+
+    Simulate.mouseMove(whisper);
+    expect(onMouseMove).to.calledOnce;
+  });
+
+  it('Should not be rendered repeatedly', () => {
+    const onMouseMove = sinon.spy();
+    const count = React.createRef(0);
+
+    const MyButton = React.forwardRef((props, ref) => {
+      count.current += 1;
+      return (
+        <button {...props} ref={ref}>
+          {count.current}
+        </button>
+      );
+    });
+
+    const whisper = getDOMNode(
+      <OverlayTrigger onMouseMove={onMouseMove} speaker={<Tooltip />}>
+        <MyButton />
+      </OverlayTrigger>
+    );
+
+    expect(count.current).to.equal(1);
+
+    act(() => {
+      Simulate.mouseMove(whisper);
+    });
+
+    expect(count.current).to.equal(1);
+  });
+
+  it('Should overlay follow the cursor', () => {
+    const onMouseMove = sinon.spy();
+    const count = React.createRef(0);
+
+    const MyButton = React.forwardRef((props, ref) => {
+      count.current += 1;
+      return (
+        <button {...props} ref={ref}>
+          {count.current}
+        </button>
+      );
+    });
+
+    const { getByRole } = render(
+      <OverlayTrigger onMouseMove={onMouseMove} trigger="hover" followCursor speaker={<Tooltip />}>
+        <MyButton />
+      </OverlayTrigger>
+    );
+
+    expect(count.current).to.equal(1);
+
+    act(() => {
+      Simulate.mouseOver(getByRole('button'));
+      Simulate.mouseMove(getByRole('button'), {
+        pageY: 10,
+        pageX: 10,
+        clientX: 10,
+        clientY: 10
+      });
+    });
+
+    expect(count.current).to.equal(2);
+    expect(getByRole('tooltip').style).to.have.property('left', '10px');
   });
 });

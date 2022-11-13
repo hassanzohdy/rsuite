@@ -8,7 +8,7 @@ Used to display a set of data
 
 ## Examples
 
-### Default
+### Basic
 
 <!--{include:`default.md`}-->
 
@@ -36,6 +36,12 @@ Used to display a set of data
 
 <!--{include:`collection.md`}-->
 
+### Fixed Item Sort
+
+> based on `collection`, Item can fixed during sort order.
+
+<!--{include:`sort-fixed.md`}-->
+
 ### Custom
 
 <!--{include:`custom.md`}-->
@@ -60,11 +66,12 @@ Used to display a set of data
 
 ### `<List.Item>`
 
-| Property   | Type `(Default)`               | Description                                     |
-| ---------- | ------------------------------ | ----------------------------------------------- |
-| collection | number &#124; string `(0)`     | collection of list item                         |
-| disabled   | boolean                        | not allowed to move this item                   |
-| index \*   | number(required when sortable) | index of item(must be unique in the collection) |
+| Property   | Type `(Default)`                    | Description                                     |
+| ---------- | ----------------------------------- | ----------------------------------------------- |
+| collection | number &#124; string `(0)`          | collection of list item                         |
+| disabled   | boolean                             | not allowed to move this item                   |
+| index \*   | number(required when sortable)      | index of item(must be unique in the collection) |
+| size       | 'lg' &#124; 'md' &#124; 'sm' `(md)` | current item size                               |
 
 ### `ts:Payload`
 

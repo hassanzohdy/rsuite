@@ -5,6 +5,7 @@ import slice from 'lodash/slice';
 import { MultiCascaderProps, ValueType } from './MultiCascader';
 import { ItemDataType } from '../@types/common';
 import { flattenTree } from '../utils/treeUtils';
+import { attachParent } from '../utils/attachParent';
 
 export interface ItemType extends ItemDataType {
   parent?: ItemType;
@@ -171,8 +172,7 @@ export function useFlattenData(data: ItemDataType[], itemKeys: ItemKeys) {
   const addFlattenData = useCallback(
     (children: ItemDataType[], parent: ItemDataType) => {
       const nodes = children.map(child => {
-        child.parent = parent;
-        return child;
+        return attachParent(child, parent);
       });
 
       parent[childrenKey] = nodes;
@@ -208,6 +208,14 @@ export function useColumnData(flattenData: ItemType[]) {
     setColumnData([...slice(columnData, 0, index), column]);
   }
 
+  /**
+   * Remove subsequent columns of the specified column
+   * @param index
+   */
+  function romoveColumnByIndex(index: number) {
+    setColumnData([...slice(columnData, 0, index)]);
+  }
+
   function enforceUpdateColumnData(nextData: ItemDataType[]) {
     const nextFlattenData = flattenTree(nextData);
     setColumnData([nextFlattenData.filter(item => !item.parent)]);
@@ -216,6 +224,7 @@ export function useColumnData(flattenData: ItemType[]) {
   return {
     columnData,
     addColumn,
+    romoveColumnByIndex,
     setColumnData,
     enforceUpdateColumnData
   };

@@ -2,7 +2,7 @@
 
 To select or input a date or time
 
-> When you need to select a date range, it is recommended to use [`<DateRangePicker>`](/components/date-range-picker)
+> When you need to select a date range, it is recommended to use [DateRangePicker](/components/date-range-picker).
 
 ## Usage
 
@@ -10,7 +10,7 @@ To select or input a date or time
 
 ## Examples
 
-### Default
+### Basic
 
 <!--{include:`basic.md`}-->
 
@@ -64,6 +64,12 @@ The calendar panel can be displayed in ISO standard via the ʻisoWeek` property 
 
 <!--{include:`disabled.md`}-->
 
+### Disable input
+
+`DatePicker` allows date and time input via keyboard by default, if you wish to disable it, you can disable editing by setting `editable={false}`.
+
+<!--{include:`editable.md`}-->
+
 ### Set the local language
 
 `DatePicker` supports local language custom configuration, but we recommend using the unified [i18n](/guide/i18n) configuration.
@@ -80,7 +86,7 @@ The calendar panel can be displayed in ISO standard via the ʻisoWeek` property 
 
 <!--{include:`custom.md`}-->
 
-Clicking "The day before" in the example does not close the picker layer because the `closeOverlay:boolean` property is configured. This propperty is used to set whether to close the picker layer after clicking the shortcut item. The default value is `true`.
+Clicking "The day before" in the example does not close the picker layer because the `closeOverlay:boolean` property is configured. This property is used to set whether to close the picker layer after clicking the shortcut item. The default value is `true`.
 
 ### Controlled
 
@@ -113,6 +119,7 @@ Learn more in [Accessibility](/guide/accessibility).
 | appearance            | 'default' &#124; 'subtle' `('default')`                         | Set picker appearence                                                                |
 | block                 | boolean                                                         | Blocking an entire row                                                               |
 | calendarDefaultDate   | Date                                                            | Calendar panel default presentation date and time                                    |
+| caretAs               | ElementType                                                     | Custom component for the caret icon                                                  |
 | cleanable             | boolean `(true)`                                                | Whether the selected value can be cleared                                            |
 | container             | HTMLElement &#124; (() => HTMLElement)                          | Sets the rendering container                                                         |
 | defaultOpen           | boolean                                                         | Default value of open property                                                       |
@@ -122,6 +129,7 @@ Learn more in [Accessibility](/guide/accessibility).
 | disabledHours         | (hour:number, date:Date) => boolean                             | Disabled hours                                                                       |
 | disabledMinutes       | (minute:number, date:Date) => boolean                           | Disabled minutes                                                                     |
 | disabledSeconds       | (second:number, date:Date) => boolean                           | Disabled seconds                                                                     |
+| editable              | boolean `(true)`                                                | Rendered as an input, the date can be entered via the keyboard                       |
 | format                | string `('yyyy-MM-dd')`                                         | Format date                                                                          |
 | hideHours             | (hour:number, date:Date) => boolean                             | Hidden hours                                                                         |
 | hideMinutes           | (minute:number, date:Date) => boolean                           | Hidden minutes                                                                       |
@@ -151,13 +159,12 @@ Learn more in [Accessibility](/guide/accessibility).
 | placeholder           | string                                                          | Placeholder                                                                          |
 | placement             | [Placement](#code-ts-placement-code) `('bottomStart')`          | The placement of component                                                           |
 | preventOverflow       | boolean                                                         | Prevent floating element overflow                                                    |
-| ranges                | [Range](#code-ts-range-code)[] ([Ranges](#code-ts-ranges-code)) | Shortcut config                                                                      |
+| ranges                | [Range[]](#code-ts-range-code) ([Ranges](#code-ts-ranges-code)) | Shortcut config                                                                      |
 | showMeridian          | boolean                                                         | Display hours in 12 format                                                           |
 | showWeekNumbers       | boolean                                                         | Whether to show week numbers                                                         |
 | size                  | 'lg' &#124; 'md' &#124; 'sm' &#124; 'xs' `('md')`               | A picker can have different sizes                                                    |
 | toggleAs              | ElementType `('a')`                                             | You can use a custom element for this component                                      |
 | value                 | Date                                                            | Value (Controlled)                                                                   |
-| caretAs               | ElementType                                                     | Custom component for the caret icon                                                  |
 
 <!--{include:(_common/types/placement.md)}-->
 <!--{include:(_common/types/range.md)}-->

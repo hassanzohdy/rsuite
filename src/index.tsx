@@ -12,7 +12,7 @@ export { default as ButtonGroup } from './ButtonGroup';
 export type { ButtonGroupProps } from './ButtonGroup';
 
 export { default as Whisper } from './Whisper';
-export type { WhisperProps } from './Whisper';
+export type { WhisperProps, WhisperInstance } from './Whisper';
 
 export { default as Tooltip } from './Tooltip';
 export type { TooltipProps } from './Tooltip';
@@ -61,7 +61,7 @@ export type { AvatarProps } from './Avatar';
 export { default as AvatarGroup } from './AvatarGroup';
 export type { AvatarGroupProps } from './AvatarGroup';
 
-export { default as toaster } from './toaster';
+export { default as toaster, useToaster } from './toaster';
 export type { Toaster } from './toaster';
 
 // Nav
@@ -98,6 +98,7 @@ export type { ToggleProps } from './Toggle';
 export { default as Form, useFormClassNames } from './Form';
 export type {
   FormProps,
+  FormInstance,
   FormGroupProps,
   FormErrorMessageProps,
   FormControlLabelProps,
@@ -215,7 +216,7 @@ export { default as List } from './List';
 export type { ListProps, ListItemProps } from './List';
 
 export { default as Calendar } from './Calendar';
-export type { CalendarPanelProps as CalendarProps } from './Calendar';
+export type { CalendarProps } from './Calendar';
 
 export { default as Carousel } from './Carousel';
 export type { CarouselProps } from './Carousel';
@@ -290,3 +291,5 @@ export type {
   BreadcrumbLocale,
   ToggleLocale
 } from './locales';
+
+export type { PickerHandle } from './Picker';

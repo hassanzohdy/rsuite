@@ -59,11 +59,13 @@ yarn add rsuite
 
 Here's a simple example
 
-```js
+```jsx
 import { Button } from 'rsuite';
 import 'rsuite/styles/index.less'; // or 'rsuite/dist/rsuite.min.css'
 
-ReactDOM.render(<Button>Button</Button>, mountNode);
+function App() {
+  return <Button appearance="primary">Hello World</Button>;
+}
 ```
 
 [**Live preview on CodeSandbox**][live-preview-on-codesandbox]
@@ -98,6 +100,10 @@ You can go through [full documentation][rsuite-doc-guide] or start with followin
 - [Use in Snowpack][demo-snowpack]
 - [Use in Vite][demo-vite]
 </details>
+
+<a href="https://vercel.com?utm_source=rsuite&utm_campaign=oss" target="_blank">
+  <img src="https://www.datocms-assets.com/31049/1618983297-powered-by-vercel.svg" alt="Vercel banner" />
+</a>
 
 ## Previous major versions
 

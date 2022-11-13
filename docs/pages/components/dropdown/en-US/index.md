@@ -12,7 +12,7 @@ A drop-down menu is a navigation that uses selectpicker if you want to select a 
 
 ## Examples
 
-### Default
+### Basic
 
 <!--{include:`basic.md`}-->
 
@@ -87,6 +87,8 @@ The default value of the `toggleAs` property of`Dropdown` is `Button`. You can s
 
 <!--{include:`with-router.md`}-->
 
+> [ Used with `Link` in React Router](/guide/composition/#react-router-dom)
+
 ## Props
 
 ### `<Dropdown>`
@@ -95,6 +97,7 @@ The default value of the `toggleAs` property of`Dropdown` is `Button`. You can s
 | --------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------- |
 | activeKey       | string                                                 | The option to activate the state, corresponding to the `eventkey` in the Dropdown.item. |
 | classPrefix     | string `('dropdown')`                                  | The prefix of the component CSS class                                                   |
+| defaultOpen     | boolean `(false)`                                      | Whether Dropdown is initially open                                                      |
 | disabled        | boolean                                                | Whether or not component is disabled                                                    |
 | icon            | Element&lt;typeof Icon&gt;                             | Set the icon                                                                            |
 | menuStyle       | CSSProperties                                          | The style of the menu.                                                                  |
@@ -102,6 +105,7 @@ The default value of the `toggleAs` property of`Dropdown` is `Button`. You can s
 | onOpen          | () => void                                             | Menu Pop-up callback function                                                           |
 | onSelect        | (eventKey: string, event) => void                      | Selected callback function                                                              |
 | onToggle        | (open?: boolean) => void                               | Callback function for menu state switching.                                             |
+| open            | boolean                                                | Whether Dropdown is open (controlled)                                                   |
 | placement       | [Placement](#code-ts-placement-code) `('bottomStart')` | The placement of Menu                                                                   |
 | renderToggle    | (props, ref) => any;                                   | Custom Toggle                                                                           |
 | title           | ReactNode                                              | Menu defaults to display content.                                                       |

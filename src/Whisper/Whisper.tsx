@@ -1,18 +1,15 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
-import OverlayTrigger from '../Overlay/OverlayTrigger';
+import OverlayTrigger, { OverlayTriggerHandle } from '../Overlay/OverlayTrigger';
 import { createChainedFunction, placementPolyfill, PLACEMENT } from '../utils';
-import { CustomConsumer } from '../CustomProvider';
+import { CustomContext } from '../CustomProvider';
 import { OverlayTriggerProps } from '../Overlay/OverlayTrigger';
 
 export type WhisperProps = OverlayTriggerProps;
 
-export interface WhisperInstance extends React.Component<WhisperProps> {
-  open: (delay?: number) => void;
-  close: (delay?: number) => void;
-}
+export type WhisperInstance = OverlayTriggerHandle;
 
-const Whisper = React.forwardRef((props: WhisperProps, ref) => {
+const Whisper = React.forwardRef((props: WhisperProps, ref: React.Ref<WhisperInstance>) => {
   const {
     onOpen,
     onClose,
@@ -22,19 +19,17 @@ const Whisper = React.forwardRef((props: WhisperProps, ref) => {
     preventOverflow,
     ...rest
   } = props;
+
+  const context = useContext(CustomContext);
   return (
-    <CustomConsumer>
-      {context => (
-        <OverlayTrigger
-          {...rest}
-          ref={ref}
-          preventOverflow={preventOverflow}
-          placement={placementPolyfill(placement, context?.rtl)}
-          onEntered={createChainedFunction(onOpen, onEntered)}
-          onExited={createChainedFunction(onClose, onExited)}
-        />
-      )}
-    </CustomConsumer>
+    <OverlayTrigger
+      {...rest}
+      ref={ref}
+      preventOverflow={preventOverflow}
+      placement={placementPolyfill(placement, context?.rtl)}
+      onEntered={createChainedFunction(onOpen, onEntered)}
+      onExited={createChainedFunction(onClose as any, onExited)}
+    />
   );
 });
 
@@ -48,7 +43,11 @@ Whisper.propTypes = {
   /**
    * Prevent floating element overflow
    */
-  preventOverflow: PropTypes.bool
+  preventOverflow: PropTypes.bool,
+  /**
+   * Whether enable speaker follow cursor
+   */
+  followCursor: PropTypes.bool
 };
 
 export default Whisper;

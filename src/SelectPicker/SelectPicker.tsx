@@ -29,18 +29,23 @@ import {
   useToggleKeyDownEvent,
   pickTriggerPropKeys,
   omitTriggerPropKeys,
-  OverlayTriggerInstance,
+  OverlayTriggerHandle,
   PositionChildProps,
   listPickerPropTypes,
-  PickerInstance
+  PickerHandle,
+  PickerToggleProps
 } from '../Picker';
 
+import { ListProps } from '../Windowing';
 import { FormControlPickerProps, ItemDataType } from '../@types/common';
-import { ListProps } from 'react-virtualized/dist/commonjs/List';
+import { ListHandle } from '../Windowing';
 
 export interface SelectProps<T> {
   /** Set group condition key in data */
   groupBy?: string;
+
+  /** Whether to display an loading indicator on toggle button */
+  loading?: boolean;
 
   /** Whether dispaly search input box */
   searchable?: boolean;
@@ -49,10 +54,9 @@ export interface SelectProps<T> {
   virtualized?: boolean;
 
   /**
-   * List-related properties in `react-virtualized`
-   * https://github.com/bvaughn/react-virtualized/blob/master/docs/List.md#prop-types
+   * Virtualized List Props
    */
-  listProps?: ListProps;
+  listProps?: Partial<ListProps>;
 
   /** Custom search rules. */
   searchBy?: (keyword: string, label: React.ReactNode, item: ItemDataType) => boolean;
@@ -83,7 +87,7 @@ export interface SelectProps<T> {
   onGroupTitleClick?: (event: React.SyntheticEvent) => void;
 
   /** Called when searching */
-  onSearch?: (searchKeyword: string, event: React.SyntheticEvent) => void;
+  onSearch?: (searchKeyword: string, event?: React.SyntheticEvent) => void;
 
   /** Called when clean */
   onClean?: (event: React.SyntheticEvent) => void;
@@ -99,15 +103,28 @@ export interface MultipleSelectProps<T> extends Omit<SelectProps<T>, 'renderValu
 }
 
 export interface SelectPickerProps<T>
-  extends FormControlPickerProps<T, PickerLocale, ItemDataType<T>>,
-    SelectProps<T> {}
+  extends Omit<
+      FormControlPickerProps<T, PickerLocale, ItemDataType<T>>,
+      'value' | 'defaultValue' | 'onChange'
+    >,
+    SelectProps<T>,
+    Pick<PickerToggleProps, 'caretAs' | 'label'> {
+  /** Initial value */
+  defaultValue?: T;
+
+  /** Current value of the component. Creates a controlled component */
+  value?: T | null;
+
+  /** Called after the value has been changed */
+  onChange?: (value: T | null, event: React.SyntheticEvent) => void;
+}
 
 const emptyArray = [];
 
 export interface SelectPickerComponent {
   <T>(
     props: SelectPickerProps<T> & {
-      ref?: Ref<PickerInstance>;
+      ref?: Ref<PickerHandle>;
     }
   ): JSX.Element | null;
   displayName?: string;
@@ -115,7 +132,7 @@ export interface SelectPickerComponent {
 }
 
 const SelectPicker = React.forwardRef(
-  <T extends number | string>(props: SelectPickerProps<T>, ref: React.Ref<PickerInstance>) => {
+  <T extends number | string>(props: SelectPickerProps<T>, ref: React.Ref<PickerHandle>) => {
     const {
       as: Component = 'div',
       appearance = 'default',
@@ -161,10 +178,11 @@ const SelectPicker = React.forwardRef(
       ...rest
     } = props;
 
-    const triggerRef = useRef<OverlayTriggerInstance>(null);
+    const triggerRef = useRef<OverlayTriggerHandle>(null);
     const targetRef = useRef<HTMLButtonElement>(null);
     const overlayRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
+    const listRef = useRef<ListHandle>(null);
     const { locale } = useCustom<PickerLocale>('Picker', overrideLocale);
     const [value, setValue] = useControlled(valueProp, defaultValue) as [
       T | null | undefined,
@@ -288,8 +306,9 @@ const SelectPicker = React.forwardRef(
     const handleExited = useCallback(() => {
       setSearchKeyword('');
       setActive(false);
+      onSearch?.('');
       onClose?.();
-    }, [onClose, setSearchKeyword]);
+    }, [onClose, setSearchKeyword, onSearch]);
 
     const handleEntered = useCallback(() => {
       setActive(true);
@@ -297,7 +316,7 @@ const SelectPicker = React.forwardRef(
       onOpen?.();
     }, [onOpen, setFocusItemValue, value]);
 
-    usePublicMethods(ref, { triggerRef, overlayRef, targetRef });
+    usePublicMethods(ref, { triggerRef, overlayRef, targetRef, listRef });
 
     // Find active `MenuItem` by `value`
     const activeItem = data.find(item => shallowEqual(item[valueKey], value));
@@ -341,6 +360,7 @@ const SelectPicker = React.forwardRef(
         <DropdownMenu
           id={id ? `${id}-listbox` : undefined}
           listProps={listProps}
+          listRef={listRef}
           disabledItemValues={disabledItemValues}
           valueKey={valueKey}
           labelKey={labelKey}

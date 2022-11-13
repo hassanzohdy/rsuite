@@ -1,21 +1,21 @@
 <!--start-code-->
 
 ```js
-const { ArrayType, StringType } = Schema.Types;
-const model = Schema.Model({
-  phone: StringType().isRequired('This field is required.')
-});
+import { Form, Button, Schema, Panel, Message, toaster, FlexboxGrid } from 'rsuite';
+import JSONTree from 'react-json-tree';
+import Select from 'react-select';
 
-const InputMask = React.forwardRef(({ onChange, ...rest }, ref) => (
-  <MaskedInput
-    {...rest}
-    ref={ref}
-    className="rs-input"
-    onChange={event => {
-      onChange(event.target.value);
-    }}
-  />
-));
+const JSONView = ({ formValue, formError }) => (
+  <div style={{ marginBottom: 10 }}>
+    <Panel className="json-tree-wrapper" header={<p>formValue</p>}>
+      <JSONTree data={formValue} />
+    </Panel>
+
+    <Panel className="json-tree-wrapper" header={<p>formError</p>}>
+      <JSONTree data={formError} />
+    </Panel>
+  </div>
+);
 
 const Field = React.forwardRef((props, ref) => {
   const { name, message, label, accepter, error, ...rest } = props;
@@ -28,13 +28,37 @@ const Field = React.forwardRef((props, ref) => {
   );
 });
 
-const mask = ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/];
+const { StringType } = Schema.Types;
+const model = Schema.Model({
+  foods: StringType().isRequired('This field is required.')
+});
+
+const options = [
+  { value: 'chocolate', label: 'Chocolate' },
+  { value: 'strawberry', label: 'Strawberry' },
+  { value: 'vanilla', label: 'Vanilla' }
+];
+
+const CustomSelect = React.forwardRef((props, ref) => {
+  const { value, onChange, ...rest } = props;
+  return (
+    <Select
+      isClearable
+      width={200}
+      ref={ref}
+      {...rest}
+      onChange={option => {
+        onChange(option?.value || null);
+      }}
+    />
+  );
+});
 
 const App = () => {
   const formRef = React.useRef();
   const [formError, setFormError] = React.useState({});
   const [formValue, setFormValue] = React.useState({
-    phone: ''
+    foods: ''
   });
 
   const handleSubmit = () => {
@@ -64,11 +88,11 @@ const App = () => {
           model={model}
         >
           <Field
-            name="phone"
-            label="Phone Number"
-            mask={mask}
-            accepter={InputMask}
-            error={formError.phone}
+            name="foods"
+            label="Food"
+            accepter={CustomSelect}
+            options={options}
+            error={formError.foods}
           />
 
           <Form.Group>
@@ -85,7 +109,7 @@ const App = () => {
   );
 };
 
-ReactDOM.render(<App />);
+ReactDOM.render(<App />, document.getElementById('root'));
 ```
 
 <!--end-code-->

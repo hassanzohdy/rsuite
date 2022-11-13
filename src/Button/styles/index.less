@@ -35,6 +35,7 @@
   .button-activated({
     color: var(--rs-btn-default-hover-text);
     background-color: var(--rs-btn-default-hover-bg);
+    text-decoration: none;
   });
 
   .button-pressed({
@@ -43,7 +44,7 @@
   });
 
   .button-disabled({
-    cursor: not-allowed;
+    cursor: @cursor-disabled;
     color: var(--rs-btn-default-disabled-text);
     background-color: var(--rs-btn-default-disabled-bg);
   });

@@ -9,6 +9,7 @@ export default {
     design: '设计原型',
     components: '组件',
     resources: '资源 & 工具',
+    templates: '模板',
     designResources: '设计资源',
     introduction: '介绍',
     usage: '快速开始',
@@ -44,12 +45,18 @@ export default {
     shareTwitter: '分享到 Twitter',
     accessibility: '无障碍设计',
     composition: '组件封装',
+    performance: '性能优化',
     examples: '示例项目',
     searchComponents: '搜索组件',
     theme: '主题',
     light: '亮色',
     dark: '暗色',
-    highContrast: '高对比'
+    highContrast: '高对比',
+    showTheSource: '展示代码',
+    transparentBackground: '背景透明',
+    seeTheSourceOnGitHub: '查看源码',
+    openCodeSandbox: '在 CodeSandbox 中打开',
+    openStackBlitz: '在  StackBlitz 中打开'
   },
   resourcesDesign: {
     defaultHeader: '组件设计 - 默认主题',
@@ -60,5 +67,20 @@ export default {
     figmaDescription: '可以直接在 Figma 平台使用的开源组件包',
     sketchHeader: 'Sketch 组件包',
     sketchDescription: '提供给 Sketch 导入的组件包'
+  },
+  resourcesIcons: {
+    searchNoResults: '没有搜索结果',
+    tryOther: '尝试使用以下图标库:'
+  },
+  extensions: {
+    '@rsuite/charts': '基于 rsuite UI 与 ECharts 的一套图表组件。',
+    '@rsuite/schema-form': '基于 schema-typed 和 rsuite 的表单生成与校验。',
+    '@rsuite/responsive-nav': '基于 rsuite Nav 增强功能的响应式导航组件。',
+    '@rsuite/react-frame': '基于 rsuite UI 的管理后端布局框架。',
+    '@rsuite/multi-date-picker': '一个可以选择多个日期的日期选择器。',
+    '@rsuite/document-nav': '基于 HTML 标题（h1-h6）标签自动生成文档导航。',
+    '@rsuite/timezone-picker': '基于 rsuite UI 的时区选择器。',
+    'rsuite-color-picker': '一个颜色选择器 ColorPicker, 可以在 rsuite 中使用。',
+    '@rsuite/formik': 'Formik 兼容的 React Suite 表单组件。'
   }
 };

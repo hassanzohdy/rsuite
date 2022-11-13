@@ -28,6 +28,7 @@ export interface MenuitemRenderProps {
 
 /**
  * Headless ARIA `menuitem`
+ * @private
  */
 function MenuItem(props: MenuItemProps) {
   const { children, selected = false, disabled = false, onActivate } = props;
@@ -129,6 +130,7 @@ function MenuItem(props: MenuItemProps) {
   if (menuState?.role === 'menubar') {
     menuitemProps.onMouseDown = handleMouseDown;
     menuitemProps.onMouseOver = handleMouseMove;
+    menuitemProps.onMouseLeave = handleMouseLeave;
   }
 
   return children(menuitemProps, menuitemRef);

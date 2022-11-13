@@ -18,6 +18,10 @@
     max-width: 100%;
   }
 
+  &-toggle {
+    min-width: 75px;
+  }
+
   &-toggle.rs-btn {
     .rs-ripple-pond {
       display: none !important;
@@ -104,6 +108,7 @@
     padding-right: 32px;
     color: var(--rs-text-primary);
     background-color: var(--rs-input-bg);
+    outline: none;
   }
 
   &.rs-btn-lg &-textbox {
@@ -120,7 +125,6 @@
 
   &-read-only {
     opacity: 0;
-    pointer-events: none;
   }
 }
 
@@ -213,6 +217,15 @@
   text-align: left;
   .ellipsis();
 
+  &-label {
+    color: var(--rs-text-primary);
+
+    &::after {
+      content: ':';
+      margin: 0 4px 0 2px;
+    }
+  }
+
   &-value {
     display: block;
     .ellipsis();
@@ -273,6 +286,8 @@
   overflow: hidden;
   // Remove transition
   transition: none;
+  display: flex;
+  flex-direction: column;
 
   .high-contrast-mode({
     border: 1px solid var(--rs-border-primary);
@@ -320,11 +335,6 @@
         top: (@input-padding-y - @input-border-width);
       }
     }
-  }
-
-  /* stylelint-disable-next-line */ // This class name provide by Virtualized.
-  .ReactVirtualized__Grid.ReactVirtualized__List:focus {
-    outline: none;
   }
 
   &.rs-picker-inline {
@@ -385,11 +395,6 @@
         .high-contrast-mode({
           background: none;
         });
-      }
-
-      /* stylelint-disable-next-line */ // This class name provide by Virtualized.
-      .ReactVirtualized__Grid & {
-        .ellipsis-basic();
       }
 
       .rs-checkbox-disabled& {

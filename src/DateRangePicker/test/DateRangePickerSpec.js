@@ -1,8 +1,7 @@
 import { getDOMNode, getInstance } from '@test/testUtils';
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, act, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ReactTestUtils, { act } from 'react-dom/test-utils';
 import {
   addDays,
   endOfMonth,
@@ -24,15 +23,15 @@ function setTimePickerValue(picker, calendarIndex, { hours, minutes, seconds }) 
     return `.rs-calendar[index="${calendarIndex}"] .rs-calendar-time-dropdown ul[data-type="${type}"]>li:nth-child(${index}) .rs-calendar-time-dropdown-cell`;
   }
 
-  ReactTestUtils.Simulate.click(
-    picker.querySelector(generateTimeItem(calendarIndex, 'hours', hours + 1))
-  );
-  ReactTestUtils.Simulate.click(
-    picker.querySelector(generateTimeItem(calendarIndex, 'minutes', minutes + 1))
-  );
-  ReactTestUtils.Simulate.click(
-    picker.querySelector(generateTimeItem(calendarIndex, 'seconds', seconds + 1))
-  );
+  act(() => {
+    fireEvent.click(picker.querySelector(generateTimeItem(calendarIndex, 'hours', hours + 1)));
+  });
+  act(() => {
+    fireEvent.click(picker.querySelector(generateTimeItem(calendarIndex, 'minutes', minutes + 1)));
+  });
+  act(() => {
+    fireEvent.click(picker.querySelector(generateTimeItem(calendarIndex, 'seconds', seconds + 1)));
+  });
 }
 
 afterEach(() => {
@@ -136,25 +135,38 @@ describe('DateRangePicker', () => {
     const startTimeToolbar = '.rs-calendar[index="0"] .rs-calendar-header-time-toolbar';
     const endTimeToolbar = '.rs-calendar[index="1"] .rs-calendar-header-time-toolbar';
 
-    // click the left calendar time toolbar, display time selection panel
-    ReactTestUtils.Simulate.click(picker.querySelector(startTimeToolbar));
+    act(() => {
+      // click the left calendar time toolbar, display time selection panel
+      fireEvent.click(picker.querySelector(startTimeToolbar));
+    });
+
     // select time to 6:6:6
     setTimePickerValue(picker, 0, { hours: 6, minutes: 6, seconds: 6 });
-    // close the left calendar time picker panel.
-    ReactTestUtils.Simulate.click(picker.querySelector(startTimeToolbar));
+
+    act(() => {
+      // close the left calendar time picker panel.
+      fireEvent.click(picker.querySelector(startTimeToolbar));
+    });
 
     assert.equal(picker.querySelector(startTimeToolbar).textContent, '06:06:06');
 
-    // click the right calendar time toolbar, display time selection panel
-    ReactTestUtils.Simulate.click(picker.querySelector(endTimeToolbar));
+    act(() => {
+      // click the right calendar time toolbar, display time selection panel
+      fireEvent.click(picker.querySelector(endTimeToolbar));
+    });
     // select time to 9:9:9
     setTimePickerValue(picker, 1, { hours: 9, minutes: 9, seconds: 9 });
-    ReactTestUtils.Simulate.click(picker.querySelector(endTimeToolbar));
+
+    act(() => {
+      fireEvent.click(picker.querySelector(endTimeToolbar));
+    });
 
     assert.equal(picker.querySelector(endTimeToolbar).textContent, '09:09:09');
 
-    // press ok button
-    ReactTestUtils.Simulate.click(picker.querySelector('.rs-picker-toolbar-right .rs-btn'));
+    act(() => {
+      // press ok button
+      fireEvent.click(picker.querySelector('.rs-picker-toolbar-right .rs-btn'));
+    });
 
     assert.ok(
       isSameRange(
@@ -193,8 +205,10 @@ describe('DateRangePicker', () => {
 
     assert.equal(picker.querySelector(endTimeToolbar).textContent, '09:09:09');
 
-    // press ok button
-    ReactTestUtils.Simulate.click(picker.querySelector('.rs-picker-toolbar-right .rs-btn'));
+    act(() => {
+      // press ok button
+      fireEvent.click(picker.querySelector('.rs-picker-toolbar-right .rs-btn'));
+    });
 
     assert.ok(
       isSameRange(
@@ -215,7 +229,7 @@ describe('DateRangePicker', () => {
       '.rs-calendar-table-cell-is-today .rs-calendar-table-cell-content'
     );
 
-    ReactTestUtils.Simulate.click(today);
+    fireEvent.click(today);
     assert.ok(today);
     assert.ok(onChangeSpy.calledOnce);
   });
@@ -226,25 +240,34 @@ describe('DateRangePicker', () => {
       <DateRangePicker defaultValue={[new Date(), new Date()]} onClean={onCleanSpy} />
     );
 
-    ReactTestUtils.Simulate.click(instance.root.querySelector('.rs-picker-toggle-clean'));
+    fireEvent.click(instance.root.querySelector('.rs-picker-toggle-clean'));
     assert.ok(onCleanSpy.calledOnce);
   });
 
-  it('Should call `onOpen` callback', () => {
-    const doneOp = () => {
-      done();
-    };
+  it('Should call `onOpen` callback', async () => {
+    const onOpenSpy = sinon.spy();
+    const instance = getDOMNode(<DateRangePicker onOpen={onOpenSpy} />);
 
-    const instance = getDOMNode(<DateRangePicker onOpen={doneOp} />);
-    ReactTestUtils.Simulate.click(instance.querySelector('.rs-picker-toggle'));
+    act(() => {
+      fireEvent.click(instance.querySelector('.rs-picker-toggle'));
+    });
+
+    await waitFor(() => {
+      expect(onOpenSpy).to.calledOnce;
+    });
   });
 
-  it('Should call `onOpen` callback', done => {
-    const doneOp = () => {
-      done();
-    };
-    const picker = getInstance(<DateRangePicker onOpen={doneOp} />);
-    picker.open();
+  it('Should call `onOpen` callback', async () => {
+    const onOpenSpy = sinon.spy();
+    const picker = getInstance(<DateRangePicker onOpen={onOpenSpy} />);
+
+    act(() => {
+      picker.open();
+    });
+
+    await waitFor(() => {
+      expect(onOpenSpy).to.calledOnce;
+    });
   });
 
   it('Should call `onClose` callback', done => {
@@ -286,18 +309,56 @@ describe('DateRangePicker', () => {
 
   it('Should select a date range by clicking starting date and ending date', () => {
     const { getByRole } = render(
-      <DateRangePicker open value={[parseISO('2019-09-10'), parseISO('2019-10-10')]} />
+      <DateRangePicker open value={[new Date('2019-09-10'), new Date('2019-10-10')]} />
     );
 
-    userEvent.click(getByRole('button', { name: '01 Sep 2019' }));
-    userEvent.click(getByRole('button', { name: '24 Sep 2019' }));
+    act(() => {
+      fireEvent.click(getByRole('gridcell', { name: '01 Sep 2019' }).firstChild);
+    });
 
     expect(getByRole('gridcell', { name: '01 Sep 2019', selected: true })).to.exist;
+
+    act(() => {
+      fireEvent.click(getByRole('gridcell', { name: '24 Sep 2019' }).firstChild);
+    });
+
     expect(getByRole('gridcell', { name: '24 Sep 2019', selected: true })).to.exist;
+  });
+
+  it('Should be disabled date', () => {
+    const instance = getInstance(
+      <DateRangePicker
+        ranges={[
+          {
+            label: 'Yesterday',
+            value: [addDays(new Date(), -1), addDays(new Date(), -1)]
+          },
+          {
+            label: 'Today',
+            value: [new Date(), new Date()]
+          },
+          {
+            label: 'Tomorrow',
+            value: [addDays(new Date(), 1), addDays(new Date(), 1)]
+          },
+          {
+            label: 'Last 7 days',
+            value: [subDays(new Date(), 6), new Date()]
+          }
+        ]}
+        disabledDate={() => true}
+        open
+      />
+    );
+
+    expect(
+      instance.overlay.querySelectorAll('.rs-picker-toolbar-ranges .rs-btn-disabled')
+    ).to.length(4);
   });
 
   it('Should select a whole week', () => {
     const onOkSpy = sinon.spy();
+
     const menu = getInstance(
       <DateRangePicker
         defaultValue={[new Date('08/08/2021'), new Date('08/14/2021')]}
@@ -311,11 +372,21 @@ describe('DateRangePicker', () => {
       ?.querySelectorAll('.rs-calendar-table-row')[1]
       .querySelector('.rs-calendar-table-cell-content');
 
-    ReactTestUtils.Simulate.click(day);
-    ReactTestUtils.Simulate.click(day);
-    ReactTestUtils.Simulate.click(menu.querySelector('.rs-picker-toolbar-right .rs-btn'));
-    assert.ok(isSameDay(startOfWeek(new Date('08/01/2021')), onOkSpy.args[0][0][0]));
-    assert.ok(isSameDay(endOfWeek(new Date('08/07/2021')), onOkSpy.args[0][0][1]));
+    act(() => {
+      fireEvent.click(day);
+    });
+
+    act(() => {
+      fireEvent.click(day);
+    });
+
+    act(() => {
+      fireEvent.click(menu.querySelector('.rs-picker-toolbar-right .rs-btn'));
+    });
+
+    expect(isSameDay(startOfWeek(new Date('08/01/2021')), onOkSpy.firstCall.firstArg[0])).to.be
+      .true;
+    expect(isSameDay(endOfWeek(new Date('08/07/2021')), onOkSpy.firstCall.firstArg[1])).to.be.true;
   });
 
   it('Should select a whole month', () => {
@@ -325,12 +396,20 @@ describe('DateRangePicker', () => {
       '.rs-calendar-table-cell-is-today .rs-calendar-table-cell-content'
     );
 
-    ReactTestUtils.Simulate.click(today);
-    ReactTestUtils.Simulate.click(today);
-    ReactTestUtils.Simulate.click(menu.querySelector('.rs-picker-toolbar-right .rs-btn'));
+    act(() => {
+      fireEvent.click(today);
+    });
 
-    assert.ok(isSameDay(startOfMonth(new Date()), onOkSpy.args[0][0][0]));
-    assert.ok(isSameDay(endOfMonth(new Date()), onOkSpy.args[0][0][1]));
+    act(() => {
+      fireEvent.click(today);
+    });
+
+    act(() => {
+      fireEvent.click(menu.querySelector('.rs-picker-toolbar-right .rs-btn'));
+    });
+
+    expect(isSameDay(startOfMonth(new Date()), onOkSpy.firstCall.firstArg[0])).to.be.true;
+    expect(isSameDay(endOfMonth(new Date()), onOkSpy.firstCall.firstArg[1])).to.be.true;
   });
 
   it('Should select a date range by hover', () => {
@@ -350,15 +429,20 @@ describe('DateRangePicker', () => {
       ?.querySelectorAll('.rs-calendar-table-row')[4]
       .querySelector('.rs-calendar-table-cell-content');
 
-    ReactTestUtils.Simulate.click(startCell);
-    ReactTestUtils.Simulate.mouseEnter(endCell);
+    act(() => {
+      fireEvent.click(startCell);
+    });
+
+    act(() => {
+      fireEvent.mouseEnter(endCell);
+    });
 
     const allInRangeCells = menu.querySelectorAll(
       '.rs-calendar-table-cell-in-range, .rs-calendar-table-cell-selected-start'
     );
 
-    assert.equal(allInRangeCells[0].textContent, '11');
-    assert.equal(allInRangeCells[allInRangeCells.length - 1].textContent, '24');
+    expect(allInRangeCells[0]).to.text('11');
+    expect(allInRangeCells[allInRangeCells.length - 1]).to.text('24');
   });
 
   it('Should select a date range by click', () => {
@@ -378,19 +462,25 @@ describe('DateRangePicker', () => {
       ?.querySelectorAll('.rs-calendar-table-row')[4]
       .querySelector('.rs-calendar-table-cell-content');
 
-    ReactTestUtils.Simulate.click(startCell);
-    ReactTestUtils.Simulate.mouseEnter(endCell);
-    ReactTestUtils.Simulate.click(endCell);
+    act(() => {
+      fireEvent.click(startCell);
+    });
+    act(() => {
+      fireEvent.mouseEnter(endCell);
+    });
+    act(() => {
+      fireEvent.click(endCell);
+    });
 
     const allInRangeCells = menu.querySelectorAll(
       '.rs-calendar-table-cell-in-range, .rs-calendar-table-cell-selected-start'
     );
 
-    assert.equal(allInRangeCells[0].textContent, '11');
-    assert.equal(allInRangeCells[allInRangeCells.length - 1].textContent, '24');
+    expect(allInRangeCells[0]).to.text('11');
+    expect(allInRangeCells[allInRangeCells.length - 1]).to.text('24');
   });
 
-  it('Should fire `onChange` if click ok after only select one date in oneTap mode', () => {
+  it('Should fire `onChange` if click ok after only select one date in oneTap mode', async () => {
     const onChangeSpy = sinon.spy();
     const menu = getInstance(
       <DateRangePicker onChange={onChangeSpy} hoverRange="week" oneTap defaultOpen />
@@ -399,14 +489,19 @@ describe('DateRangePicker', () => {
     const today = menu.querySelector(
       '.rs-calendar-table-cell-is-today .rs-calendar-table-cell-content'
     );
-    ReactTestUtils.Simulate.click(today);
-    assert.ok(isSameDay(startOfWeek(new Date()), onChangeSpy.args[0][0][0]));
-    assert.ok(isSameDay(endOfWeek(new Date()), onChangeSpy.args[0][0][1]));
+
+    act(() => {
+      fireEvent.click(today);
+    });
+
+    expect(onChangeSpy.callCount).to.equal(1);
+    expect(isSameDay(startOfWeek(new Date()), onChangeSpy.firstCall.firstArg[0])).to.be.true;
+    expect(isSameDay(endOfWeek(new Date()), onChangeSpy.firstCall.firstArg[1])).to.be.true;
   });
 
   it('Should have a custom className prefix', () => {
     const instance = getDOMNode(<DateRangePicker classPrefix="custom-prefix" />);
-    assert.ok(instance.className.match(/\bcustom-prefix\b/));
+    expect(instance.className).to.contain('custom-prefix');
   });
 
   it('Should show default calendar value', () => {
@@ -414,12 +509,11 @@ describe('DateRangePicker', () => {
       <DateRangePicker
         open
         defaultCalendarValue={[parseISO('2019-01-01'), parseISO('2019-09-01')]}
-      />,
-      false
+      />
     ).overlay;
 
-    assert.ok(menu.querySelector('div[title="01 Feb 2019"]'));
-    assert.ok(menu.querySelector('div[title="01 Sep 2019"]'));
+    expect(menu.querySelector('div[title="01 Feb 2019"]')).to.exist;
+    expect(menu.querySelector('div[title="01 Sep 2019"]')).to.exist;
   });
 
   it('Should have only one calendar', () => {
@@ -430,7 +524,7 @@ describe('DateRangePicker', () => {
       'rs-picker-daterange-panel-show-one-calendar'
     );
 
-    assert.equal(menu.querySelectorAll('.rs-picker-daterange-calendar-single').length, 1);
+    expect(menu.querySelectorAll('.rs-picker-daterange-calendar-single')).to.length(1);
   });
 
   it('Should display the formatted date', () => {
@@ -438,10 +532,11 @@ describe('DateRangePicker', () => {
     const target = instance.target;
     const input = target.querySelector('.rs-picker-toggle-textbox');
 
-    input.value = '2020010120210707';
-    ReactTestUtils.Simulate.change(input);
+    act(() => {
+      fireEvent.change(input, { target: { value: 2020010120210707 } });
+    });
 
-    assert.equal(input.value, '2020-01-01 ~ 2021-07-07');
+    expect(input.value).to.equal('2020-01-01 ~ 2021-07-07');
   });
 
   it('Should render an error message', () => {
@@ -449,12 +544,13 @@ describe('DateRangePicker', () => {
     const target = instance.target;
     const input = target.querySelector('.rs-picker-toggle-textbox');
 
-    input.value = 'ssss';
-    ReactTestUtils.Simulate.change(input);
-    assert.include(instance.root.className, 'rs-picker-error');
+    fireEvent.change(input, { target: { value: 'ssss' } });
 
-    ReactTestUtils.Simulate.blur(input);
-    assert.notInclude(instance.root.className, 'rs-picker-error');
+    expect(instance.root.className).to.include('rs-picker-error');
+
+    fireEvent.blur(input);
+
+    expect(instance.root.className).to.not.include('rs-picker-error');
   });
 
   it('Should update the calendar when clicking on a non-current month', () => {
@@ -470,15 +566,14 @@ describe('DateRangePicker', () => {
       '.rs-calendar-table-cell-un-same-month .rs-calendar-table-cell-content'
     );
 
-    ReactTestUtils.Simulate.mouseEnter(unSameMonthCell);
-    ReactTestUtils.Simulate.click(unSameMonthCell);
+    fireEvent.mouseEnter(unSameMonthCell);
+    fireEvent.click(unSameMonthCell);
 
-    assert.equal(
+    expect(
       menu
         .querySelector('.rs-calendar-table-cell-un-same-month .rs-calendar-table-cell-content')
-        .getAttribute('title'),
-      '30 May 2021'
-    );
+        .getAttribute('title')
+    ).to.equal('30 May 2021');
   });
 
   it('Should call `onChange` callback when input change and blur', () => {
@@ -488,16 +583,15 @@ describe('DateRangePicker', () => {
     const input = instance.root.querySelector('.rs-picker-toggle-textbox');
 
     act(() => {
-      input.value = '09/10/2020 ~ 09/11/2021';
-      ReactTestUtils.Simulate.change(input);
+      fireEvent.change(input, { target: { value: '0910202009112021' } });
     });
     act(() => {
-      ReactTestUtils.Simulate.blur(input);
+      fireEvent.blur(input);
     });
 
-    assert.isTrue(onChangeSpy.calledOnce);
-    assert.equal(format(onChangeSpy.firstCall.firstArg[0], 'dd/MM/yyyy'), '09/10/2020');
-    assert.equal(format(onChangeSpy.firstCall.firstArg[1], 'dd/MM/yyyy'), '09/11/2021');
+    expect(onChangeSpy).to.called;
+    expect(format(onChangeSpy.firstCall.firstArg[0], 'dd/MM/yyyy')).to.equal('09/10/2020');
+    expect(format(onChangeSpy.firstCall.firstArg[1], 'dd/MM/yyyy')).to.equal('09/11/2021');
   });
 
   it('Should call `onChange` callback when input change and Enter key', () => {
@@ -507,16 +601,15 @@ describe('DateRangePicker', () => {
     const input = instance.root.querySelector('.rs-picker-toggle-textbox');
 
     act(() => {
-      input.value = '09/10/2020 ~ 09/11/2021';
-      ReactTestUtils.Simulate.change(input);
+      fireEvent.change(input, { target: { value: '0910202009112021' } });
     });
     act(() => {
-      ReactTestUtils.Simulate.keyDown(input, { key: 'Enter' });
+      fireEvent.keyDown(input, { key: 'Enter' });
     });
 
-    assert.isTrue(onChangeSpy.calledOnce);
-    assert.equal(format(onChangeSpy.firstCall.firstArg[0], 'dd/MM/yyyy'), '09/10/2020');
-    assert.equal(format(onChangeSpy.firstCall.firstArg[1], 'dd/MM/yyyy'), '09/11/2021');
+    expect(onChangeSpy).to.called;
+    expect(format(onChangeSpy.firstCall.firstArg[0], 'dd/MM/yyyy')).to.equal('09/10/2020');
+    expect(format(onChangeSpy.firstCall.firstArg[1], 'dd/MM/yyyy')).to.equal('09/11/2021');
   });
 
   it('Should be show meridian', () => {
@@ -530,13 +623,12 @@ describe('DateRangePicker', () => {
     );
     const picker = instance.overlay;
 
-    assert.equal(picker.querySelector('.rs-calendar-header-meridian').textContent, 'PM');
-    assert.equal(picker.querySelector('.rs-calendar-header-title-time').textContent, '01:00:00');
-    assert.equal(
-      picker.querySelector('.rs-calendar-time-dropdown-column').querySelectorAll('li').length,
-      12
-    );
-    assert.equal(picker.querySelector('.rs-calendar-time-dropdown-column li').textContent, '12');
+    expect(picker.querySelector('.rs-calendar-header-meridian')).to.text('PM');
+    expect(picker.querySelector('.rs-calendar-header-title-time')).to.text('01:00:00');
+    expect(
+      picker.querySelector('.rs-calendar-time-dropdown-column').querySelectorAll('li')
+    ).to.length(12);
+    expect(picker.querySelector('.rs-calendar-time-dropdown-column li')).to.text('12');
   });
 
   it('Should keep AM PM unchanged', () => {
@@ -551,12 +643,12 @@ describe('DateRangePicker', () => {
 
     const picker = instance.overlay;
 
-    assert.equal(picker.querySelector('.rs-calendar-header-title-time').textContent, '01:00:00');
+    expect(picker.querySelector('.rs-calendar-header-title-time')).to.text('01:00:00');
 
-    ReactTestUtils.Simulate.click(picker.querySelector('.rs-calendar-time-dropdown-cell'));
+    fireEvent.click(picker.querySelector('.rs-calendar-time-dropdown-cell'));
 
-    assert.equal(picker.querySelector('.rs-calendar-header-meridian').textContent, 'PM');
-    assert.equal(picker.querySelector('.rs-calendar-header-title-time').textContent, '12:00:00');
+    expect(picker.querySelector('.rs-calendar-header-meridian')).to.text('PM');
+    expect(picker.querySelector('.rs-calendar-header-title-time')).to.text('12:00:00');
   });
 
   it('Should change AM/PM ', () => {
@@ -570,9 +662,12 @@ describe('DateRangePicker', () => {
     );
 
     const meridian = instance.overlay.querySelector('.rs-calendar-header-meridian');
-    assert.equal(meridian.textContent, 'PM');
-    ReactTestUtils.Simulate.click(meridian);
-    assert.equal(meridian.textContent, 'AM');
+
+    expect(meridian).to.text('PM');
+
+    fireEvent.click(meridian);
+
+    expect(meridian).to.text('AM');
   });
 
   it('Should be optional for all months', () => {
@@ -580,7 +675,194 @@ describe('DateRangePicker', () => {
     const disabledCells = instance.overlay.querySelectorAll(
       '.rs-calendar-month-dropdown-cell.disabled'
     );
-    assert.equal(disabledCells.length, 0);
+
+    expect(disabledCells).to.length(0);
+  });
+
+  it('Should not get warned about deprecated `caretComponent` prop', () => {
+    sinon.spy(console, 'warn');
+
+    render(<DateRangePicker />);
+
+    expect(console.warn).not.to.have.been.calledWith(
+      sinon.match(/"caretComponent" property of "PickerToggle" has been deprecated/)
+    );
+  });
+
+  it('Should render a custom caret', () => {
+    const { getByLabelText } = render(<DateRangePicker caretAs={GearIcon} />);
+
+    expect(getByLabelText('gear')).to.have.class('rs-icon');
+  });
+
+  it('Should render a custom calendar title', () => {
+    const { getAllByTestId } = render(
+      <DateRangePicker
+        value={[new Date(2022, 1, 1), new Date(2022, 2, 2)]}
+        open
+        renderTitle={date => (
+          <span data-testid="calendar-title">
+            {date.getMonth()} - {date.getFullYear()}
+          </span>
+        )}
+      />
+    );
+
+    const [firstTitle, secondTitle] = getAllByTestId('calendar-title');
+
+    expect(firstTitle).to.have.text('1 - 2022');
+    expect(secondTitle).to.have.text('2 - 2022');
+  });
+
+  it('Should cancel the Ok button disable when the shortcut button is clicked', () => {
+    const menu = getInstance(
+      <DateRangePicker
+        open
+        defaultCalendarValue={[parseISO('2022-05-01'), parseISO('2022-06-01')]}
+      />
+    ).overlay;
+
+    const btnDay = menu.querySelector('.rs-calendar-table-cell-content');
+    const btnShortcutToday = menu.querySelector('.rs-picker-toolbar-ranges button');
+    const btnOk = menu.querySelector('.rs-picker-toolbar-right button');
+
+    act(() => {
+      fireEvent.click(btnDay);
+    });
+
+    expect(btnOk.disabled).to.be.true;
+
+    act(() => {
+      fireEvent.click(btnShortcutToday);
+    });
+
+    expect(btnOk.disabled).to.be.false;
+  });
+
+  it('Should close picker after predefined range is clicked', async () => {
+    const onCloseSpy = sinon.spy();
+    const onChangeSpy = sinon.spy();
+
+    const { getByRole } = render(
+      <DateRangePicker
+        defaultOpen
+        ranges={[
+          {
+            label: 'Yesterday',
+            value: [addDays(new Date(), -1), addDays(new Date(), -1)]
+          }
+        ]}
+        onChange={onChangeSpy}
+        onExit={onCloseSpy}
+      />
+    );
+
+    userEvent.click(getByRole('button', { name: 'Yesterday' }));
+
+    await waitFor(() => {
+      expect(onCloseSpy).to.calledOnce;
+      expect(onChangeSpy).to.calledOnce;
+    });
+  });
+
+  it('Should not close picker', async () => {
+    const onCloseSpy = sinon.spy();
+    const onChangeSpy = sinon.spy();
+    const yesterday = addDays(new Date(), -1);
+
+    const { getByRole } = render(
+      <DateRangePicker
+        defaultOpen
+        ranges={[
+          {
+            label: 'Yesterday',
+            value: [yesterday, yesterday],
+            closeOverlay: false
+          }
+        ]}
+        onChange={onChangeSpy}
+        onExit={onCloseSpy}
+      />
+    );
+
+    fireEvent.click(getByRole('button', { name: 'Yesterday' }));
+
+    expect(getByRole('dialog').querySelector('.rs-picker-daterange-header')).to.text(
+      `${format(yesterday, 'yyyy-MM-dd')} ~ ${format(yesterday, 'yyyy-MM-dd')}`
+    );
+
+    await waitFor(() => {
+      expect(onChangeSpy).to.not.called;
+      expect(onCloseSpy).to.not.called;
+    });
+  });
+
+  it('Should call onFocus callback', () => {
+    const onFocusSpy = sinon.spy();
+    const { getByRole } = render(<DateRangePicker onFocus={onFocusSpy} />);
+    const input = getByRole('combobox').querySelector('input');
+
+    fireEvent.focus(input);
+
+    expect(onFocusSpy).to.have.been.calledOnce;
+  });
+
+  it('Should render ranges on the left', () => {
+    const onCloseSpy = sinon.spy();
+    const onChangeSpy = sinon.spy();
+    const yesterday = addDays(new Date(), -1);
+
+    const { getByRole } = render(
+      <DateRangePicker
+        defaultOpen
+        ranges={[
+          {
+            label: 'Yesterday',
+            value: [yesterday, yesterday],
+            placement: 'left'
+          }
+        ]}
+        onChange={onChangeSpy}
+        onExit={onCloseSpy}
+      />
+    );
+
+    expect(
+      getByRole('dialog').querySelector('.rs-picker-daterange-predefined').firstChild.firstChild
+    ).to.equal(getByRole('button', { name: 'Yesterday' }));
+
+    expect(getByRole('dialog').querySelector('.rs-picker-toolbar-ranges button')).to.not.exist;
+  });
+
+  it('Should be controllable for keyboard input', () => {
+    const { getByTestId } = render(
+      <>
+        <DateRangePicker data-testid="picker-1" />
+        <DateRangePicker data-testid="picker-2" editable={false} />
+      </>
+    );
+
+    const picker1 = getByTestId('picker-1').querySelector('input');
+    const picker2 = getByTestId('picker-2').querySelector('input');
+
+    expect(picker1).to.have.attribute('readonly');
+    expect(picker2).to.have.attribute('readonly');
+
+    fireEvent.focus(picker1);
+    expect(picker1).to.not.have.attribute('readonly');
+
+    fireEvent.focus(picker2);
+    expect(picker2).to.have.attribute('readonly');
+  });
+
+  it('Should not render the ranges element', () => {
+    const { getByRole } = render(<DateRangePicker open ranges={[]} />);
+
+    expect(getByRole('dialog').querySelector('.rs-picker-toolbar-ranges')).to.not.exist;
+    expect(getByRole('dialog').querySelector('.rs-picker-daterange-predefined')).to.not.exist;
+
+    // A flex layout toolbar should render two children so that the ok button appears on the right
+    expect(getByRole('dialog').querySelector('.rs-picker-toolbar').childNodes).to.have.length(2);
   });
 
   describe('Plain text', () => {
@@ -609,19 +891,188 @@ describe('DateRangePicker', () => {
     });
   });
 
-  it('Should not get warned about deprecated `caretComponent` prop', () => {
-    sinon.spy(console, 'warn');
+  describe('Time stability', () => {
+    it('Should the end time not change when the start date is clicked when defaultCalendarValue is set', () => {
+      const onSelectSpy = sinon.spy();
+      const { getByRole } = render(
+        <DateRangePicker
+          open
+          format="yyyy-MM-dd HH:mm:ss"
+          onSelect={onSelectSpy}
+          defaultCalendarValue={[new Date('2022-02-01 00:00:00'), new Date('2022-03-01 23:59:59')]}
+        />
+      );
 
-    render(<DateRangePicker />);
+      expect(getByRole('button', { name: '00:00:00' })).to.be.visible;
+      expect(getByRole('button', { name: '23:59:59' })).to.be.visible;
 
-    expect(console.warn).not.to.have.been.calledWith(
-      sinon.match(/"caretComponent" property of "PickerToggle" has been deprecated/)
-    );
-  });
+      fireEvent.click(getByRole('gridcell', { name: '07 Feb 2022' }).firstChild);
 
-  it('Should render a custom caret', () => {
-    const { getByLabelText } = render(<DateRangePicker caretAs={GearIcon} />);
+      expect(onSelectSpy).to.have.been.calledOnce;
+      expect(getByRole('button', { name: '00:00:00' })).to.be.visible;
+      expect(getByRole('button', { name: '23:59:59' })).to.be.visible;
 
-    expect(getByLabelText('gear')).to.have.class('rs-icon');
+      fireEvent.click(getByRole('gridcell', { name: '10 Feb 2022' }).firstChild);
+
+      expect(onSelectSpy).to.have.been.calledTwice;
+      expect(getByRole('button', { name: '00:00:00' })).to.be.visible;
+      expect(getByRole('button', { name: '23:59:59' })).to.be.visible;
+      expect(getByRole('dialog').querySelector('.rs-picker-daterange-header')).to.have.text(
+        '2022-02-07 00:00:00 ~ 2022-02-10 23:59:59'
+      );
+    });
+
+    it('Should the end time not change when the start date is clicked when controlled', () => {
+      const onSelectSpy = sinon.spy();
+      const { getByRole } = render(
+        <DateRangePicker
+          open
+          format="yyyy-MM-dd HH:mm:ss"
+          onSelect={onSelectSpy}
+          value={[new Date('2022-02-01 00:00:00'), new Date('2022-03-01 23:59:59')]}
+        />
+      );
+
+      expect(getByRole('button', { name: '00:00:00' })).to.be.visible;
+      expect(getByRole('button', { name: '23:59:59' })).to.be.visible;
+
+      fireEvent.click(getByRole('gridcell', { name: '07 Feb 2022' }).firstChild);
+
+      expect(onSelectSpy).to.have.been.calledOnce;
+      expect(getByRole('button', { name: '00:00:00' })).to.be.visible;
+      expect(getByRole('button', { name: '23:59:59' })).to.be.visible;
+
+      fireEvent.click(getByRole('gridcell', { name: '10 Feb 2022' }).firstChild);
+
+      expect(onSelectSpy).to.have.been.calledTwice;
+      expect(getByRole('button', { name: '00:00:00' })).to.be.visible;
+      expect(getByRole('button', { name: '23:59:59' })).to.be.visible;
+      expect(getByRole('dialog').querySelector('.rs-picker-daterange-header')).to.have.text(
+        '2022-02-07 00:00:00 ~ 2022-02-10 23:59:59'
+      );
+    });
+
+    it('Should not change the start and end time when the month is changed', () => {
+      const { getByRole } = render(
+        <DateRangePicker
+          open
+          format="yyyy-MM-dd HH:mm:ss"
+          value={[new Date('2022-02-01 00:00:00'), new Date('2022-03-01 23:59:59')]}
+        />
+      );
+
+      const headerDateTitles = getByRole('dialog').querySelectorAll(
+        '.rs-calendar-header-title-date'
+      );
+      const handerTimeTitles = getByRole('dialog').querySelectorAll(
+        '.rs-calendar-header-title-time'
+      );
+      const firstCalendarForwardButton = getByRole('dialog').querySelectorAll(
+        '.rs-calendar-header-forward'
+      )[0];
+
+      const secondCalendarBackwardButton = getByRole('dialog').querySelectorAll(
+        '.rs-calendar-header-backward'
+      )[1];
+
+      expect(handerTimeTitles[0]).to.have.text('00:00:00');
+      expect(handerTimeTitles[1]).to.have.text('23:59:59');
+      expect(headerDateTitles[0]).to.have.text('Feb 2022');
+      expect(headerDateTitles[1]).to.have.text('Mar 2022');
+
+      fireEvent.click(firstCalendarForwardButton);
+
+      expect(handerTimeTitles[0]).to.have.text('00:00:00');
+      expect(handerTimeTitles[1]).to.have.text('23:59:59');
+      expect(headerDateTitles[0]).to.have.text('Mar 2022');
+      expect(headerDateTitles[1]).to.have.text('Apr 2022');
+
+      fireEvent.click(secondCalendarBackwardButton);
+
+      expect(handerTimeTitles[0]).to.have.text('00:00:00');
+      expect(handerTimeTitles[1]).to.have.text('23:59:59');
+      expect(headerDateTitles[0]).to.have.text('Feb 2022');
+      expect(headerDateTitles[1]).to.have.text('Mar 2022');
+    });
+
+    it('Should not change the start and end time when clicking on the second calendar first', () => {
+      const onSelectSpy = sinon.spy();
+      const { getByRole } = render(
+        <DateRangePicker
+          open
+          format="yyyy-MM-dd HH:mm:ss"
+          onSelect={onSelectSpy}
+          value={[new Date('2022-02-01 00:00:00'), new Date('2022-03-01 23:59:59')]}
+        />
+      );
+
+      expect(getByRole('button', { name: '00:00:00' })).to.be.visible;
+      expect(getByRole('button', { name: '23:59:59' })).to.be.visible;
+
+      fireEvent.click(getByRole('gridcell', { name: '20 Mar 2022' }).firstChild);
+
+      expect(onSelectSpy).to.have.been.calledOnce;
+      expect(getByRole('button', { name: '00:00:00' })).to.be.visible;
+      expect(getByRole('button', { name: '23:59:59' })).to.be.visible;
+
+      fireEvent.click(getByRole('gridcell', { name: '21 Apr 2022' }).firstChild);
+
+      expect(onSelectSpy).to.have.been.calledTwice;
+      expect(getByRole('button', { name: '00:00:00' })).to.be.visible;
+      expect(getByRole('button', { name: '23:59:59' })).to.be.visible;
+      expect(getByRole('dialog').querySelector('.rs-picker-daterange-header')).to.have.text(
+        '2022-03-20 00:00:00 ~ 2022-04-21 23:59:59'
+      );
+    });
+
+    it('Should render the default datetime after clicking the clear button', () => {
+      const onCleanSpy = sinon.spy();
+      const { getByRole } = render(
+        <DateRangePicker
+          open
+          format="yyyy-MM-dd HH:mm:ss"
+          onClean={onCleanSpy}
+          defaultValue={[new Date('2022-02-01 01:01:01'), new Date('2022-03-01 02:02:02')]}
+          defaultCalendarValue={[new Date('2022-04-04 00:00:00'), new Date('2022-05-05 23:59:59')]}
+        />
+      );
+
+      expect(getByRole('button', { name: '01:01:01' })).to.be.visible;
+      expect(getByRole('button', { name: '02:02:02' })).to.be.visible;
+
+      fireEvent.click(getByRole('button', { name: 'Clear' }));
+
+      expect(onCleanSpy).to.have.been.calledOnce;
+      expect(getByRole('button', { name: '00:00:00' })).to.be.visible;
+      expect(getByRole('button', { name: '23:59:59' })).to.be.visible;
+    });
+
+    it('Should switch time from PM to AM', () => {
+      const { getByRole } = render(
+        <DateRangePicker
+          open
+          format="yyyy-MM-dd HH:mm:ss"
+          showMeridian
+          value={[new Date('2022-02-01 13:00:00'), new Date('2022-03-01 14:00:00')]}
+        />
+      );
+
+      const header = getByRole('dialog').querySelector('.rs-picker-daterange-header');
+      const switchButtons = getByRole('dialog').querySelectorAll('.rs-calendar-header-meridian');
+
+      expect(header).to.have.text('2022-02-01 13:00:00 ~ 2022-03-01 14:00:00');
+      expect(switchButtons[0]).to.have.text('PM');
+      expect(switchButtons[1]).to.have.text('PM');
+
+      fireEvent.click(switchButtons[0]);
+
+      expect(header).to.have.text('2022-02-01 01:00:00 ~ 2022-03-01 14:00:00');
+      expect(switchButtons[0]).to.have.text('AM');
+
+      fireEvent.click(switchButtons[1]);
+
+      expect(header).to.have.text('2022-02-01 01:00:00 ~ 2022-03-01 02:00:00');
+      expect(switchButtons[1]).to.have.text('AM');
+    });
   });
 });

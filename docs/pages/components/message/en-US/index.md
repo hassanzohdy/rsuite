@@ -8,7 +8,7 @@ Used to show important tips on a page.
 
 ## Examples
 
-### Default
+### Basic
 
 <!--{include:`basic.md`}-->
 
@@ -34,7 +34,7 @@ A message type that contains an Alert
 
 <!--{include:`with-toaster.md`}-->
 
-## Props & Methods
+## Props & Hooks
 
 ### `<Message>`
 

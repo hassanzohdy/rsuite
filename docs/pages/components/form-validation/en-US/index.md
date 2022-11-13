@@ -57,10 +57,20 @@ Form Check needs to be used `<Form>`, `<Form.Control>` and `Schema` 。
 
 - `<Form>` To define a form, you can set `formValue` and `model` for the form, and `model` is the data model created by `Schema.Model`.
 - `<Form.Control>` Define a Filed that corresponds to the `key` of the `Schema.Model` object via the `name` property. For detailed reference: Custom Form Components.
-- `Schema.Model` Define a data model, using the reference [schema](/components/schema).
+- `Schema.Model` Define a data model, using the reference [schema](https://github.com/rsuite/schema-typed#schema-typed).
 - Custom trigger check: `<Form>` instance provides `check` and `checkForField` methods, used to trigger form checksum field validation
 
 <!--{include:`form-check.md`}-->
+
+### Field level Verification rules
+
+When there are more and more Fields, huge `model` codes or files are generated. And since in the definition at the top level, it is not flexible enough(ex: If a new Field is added or a Field is deleted, Normally you also need to manipulate the `model` at the top level)
+
+At this time, the verification rules of the Field level may be a better choice. It adds it when the component is mounted, and delete it when the component is unmounted.
+
+- `<Form.Control>` supports adding verification rule for the current Field via the `rule` attribute.
+
+<!--{include:`form-control-rule.md`}-->
 
 ### Asynchronous check
 
@@ -83,7 +93,7 @@ All Data Entry-related components can be used in forms such as `Checkbox`, `Sele
 
 ### Third-Party Libraries
 
-Take [text-mask](https://github.com/text-mask/text-mask) as an example:
+Sometimes you need to customize form components or be compatible with third-party components. For example [react-select](https://github.com/JedWatson/react-select).
 
 <!--{include:`custom-third-party-libraries.md`}-->
 

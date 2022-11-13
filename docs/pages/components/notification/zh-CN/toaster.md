@@ -1,4 +1,16 @@
-### toaster
+### useToaster
+
+useToaster 是一个用于创建和管理 Toast 的 React Hook。
+
+```ts
+import { useToaster } from 'rsuite';
+
+return () => {
+  const toaster = useToaster();
+
+  ...
+};
+```
 
 #### toaster.push
 
@@ -15,7 +27,7 @@ interface ToastContainerProps{
   container?: HTMLElement | (() => HTMLElement);
 }
 
-toaster.push(message: React.ReactNode, options?: ToastContainerProps): string;
+toaster.push(message: ReactNode, options?: ToastContainerProps): string;
 ```
 
 e.g:

@@ -1,9 +1,12 @@
 <!--start-code-->
 
 ```js
-const instance = (
+import { DatePicker } from 'rsuite';
+
+const App = () => (
   <DatePicker
     format="yyyy-MM-dd HH:mm:ss"
+    calendarDefaultDate={new Date('2022-02-02 00:00:00')}
     ranges={[
       {
         label: 'Now',
@@ -14,7 +17,7 @@ const instance = (
   />
 );
 
-ReactDOM.render(instance);
+ReactDOM.render(<App />, document.getElementById('root'));
 ```
 
 <!--end-code-->

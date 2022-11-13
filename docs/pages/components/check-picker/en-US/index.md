@@ -8,9 +8,13 @@ Used for multiple data selection, support grouping.
 
 ## Examples
 
-### Default
+### Basic
 
 <!--{include:`basic.md`}-->
+
+### With a label
+
+<!--{include:`with-label.md`}-->
 
 ### Appearance
 
@@ -29,6 +33,13 @@ Set the `sticky` property to put the selected in the options to the top.
 ### Block
 
 <!--{include:`block.md`}-->
+
+### Loading state
+
+When the picker is loading, a spinner is displayed to indicate the loading state.
+Clicking a loading picker won't open its options menu.
+
+<!--{include:`loading.md`}-->
 
 ### Group
 
@@ -70,6 +81,10 @@ Customize a select all function.
 
 <!--{include:`controlled.md`}-->
 
+### Virtualize Long Lists
+
+<!--{include:`virtualized.md`}-->
+
 ## Accessibility
 
 Learn more in [Accessibility](/guide/accessibility).
@@ -85,13 +100,16 @@ Learn more in [Accessibility](/guide/accessibility).
 | classPrefix        | string `('picker')`                                                                                | The prefix of the component CSS class                       |
 | cleanable          | boolean `(true)`                                                                                   | Whether the selected value can be cleared                   |
 | container          | HTMLElement &#124; (() => HTMLElement)                                                             | Sets the rendering container                                |
+| countable          | boolean `(true)`                                                                                   | Whether display selected items count                        |
 | data \*            | [ItemDataType][item][]                                                                             | The data of component                                       |
 | defaultValue       | [ValueType][value]                                                                                 | Default values of the selected items                        |
 | disabled           | boolean                                                                                            | Whether disabled component                                  |
 | disabledItemValues | [ValueType][value]                                                                                 | Disable item by value                                       |
 | groupBy            | string                                                                                             | Set group condition key in data                             |
+| label              | ReactNode                                                                                          | A label displayed at the beginning of toggle button         |
 | labelKey           | string `('label')`                                                                                 | Set label key in data                                       |
-| listProps          | [ListProps][listprops]                                                                             | List-related properties in `react-virtualized`              |
+| listProps          | [ListProps][listprops]                                                                             | Properties of virtualized lists                             |
+| loading            | boolean `(false)`                                                                                  | Whether to display a loading state indicator                |
 | locale             | [PickerLocaleType](/guide/i18n/#pickers)                                                           | Locale text                                                 |
 | menuMaxHeight      | number `(320)`                                                                                     | The max height of Dropdown                                  |
 | menuClassName      | string                                                                                             | A css class to apply to the Menu DOM node.                  |
@@ -129,10 +147,9 @@ Learn more in [Accessibility](/guide/accessibility).
 | virtualized        | boolean                                                                                            | Whether using Virtualized List                              |
 | caretAs            | ElementType                                                                                        | Custom component for the caret icon                         |
 
-[listprops]: https://github.com/bvaughn/react-virtualized/blob/master/docs/List.md#prop-types
-
 <!--{include:(_common/types/item-data-type.md)}-->
 <!--{include:(_common/types/placement.md)}-->
+<!--{include:(_common/types/list-props.md)}-->
 
 ### `ts:ValueType`
 
@@ -142,3 +159,4 @@ type ValueType = (string | number)[];
 
 [item]: #code-ts-item-data-type-code
 [value]: #code-ts-value-type-code
+[listprops]: #code-ts-list-props-code

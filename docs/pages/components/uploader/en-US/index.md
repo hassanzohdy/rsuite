@@ -8,7 +8,7 @@ Upload files by clicking or drag-and-drop, it supports previewing the uploaded i
 
 ## Examples
 
-### Default
+### Basic
 
 <!--{include:`basic.md`}-->
 
@@ -56,6 +56,8 @@ Upload files by clicking or drag-and-drop, it supports previewing the uploaded i
 
 ### `<Uploader>`
 
+Extends the props of the [Button](/components/button/) component.
+
 | Property           | Type `(Default)`                                                                                                             | Description                                                                                                                                                                      |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | accept             | string                                                                                                                       | File types that can be accepted. See [HTML attribute: accept](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/accept) Attribute                                     |
@@ -74,6 +76,7 @@ Upload files by clicking or drag-and-drop, it supports previewing the uploaded i
 | listType           | menu: 'text' , 'picture-text' , 'picture' `('text')`                                                                         | Upload list Style                                                                                                                                                                |
 | locale             | [UploaderLocaleType](/guide/i18n/#uploader)                                                                                  | Locale text                                                                                                                                                                      |
 | maxPreviewFileSize | number `(5242880)`                                                                                                           | Set the maximum limit for preview files                                                                                                                                          |
+| method             | string `('POST')`                                                                                                            | The http method of upload request                                                                                                                                                |
 | multiple           | boolean                                                                                                                      | Allow multiple file uploads to be selected at a time                                                                                                                             |
 | name               | string `('file')`                                                                                                            | Upload the parameter name of the corresponding file                                                                                                                              |
 | onChange           | (fileList: [FileType][file][]) => void                                                                                       | callback function that the upload queue has changed                                                                                                                              |
@@ -86,11 +89,11 @@ Upload files by clicking or drag-and-drop, it supports previewing the uploaded i
 | onUpload           | (file: [FileType][file]) => void                                                                                             | The callback function that starts the upload file                                                                                                                                |
 | removable          | boolean `(true)`                                                                                                             | Removable list file                                                                                                                                                              |
 | renderFileInfo     | (file: [FileType][file], fileElement: ReactNode) => ReactNode                                                                | Custom render file information                                                                                                                                                   |
-| renderThumbnail    | (file: [FileType][file], thumbnail: React.ReactNode) => React.ReactNode                                                      | Custom render thumbnail                                                                                                                                                          |
+| renderThumbnail    | (file: [FileType][file], thumbnail: ReactNode) => ReactNode                                                                  | Custom render thumbnail                                                                                                                                                          |
 | shouldQueueUpdate  | (fileList: [FileType][file][], newFile: [FileType][file][] &#124; [FileType][file]) => boolean &#124; Promise&lt;boolean&gt; | Allow the queue to be updated. After you select a file, update the checksum function before the upload file queue, and return false to not update                                |
 | shouldUpload       | (file:[FileType][file] ) => boolean &#124; Promise&lt;boolean&gt;                                                            | Allow uploading of files. Check function before file upload, return false without uploading                                                                                      |
 | timeout            | number                                                                                                                       | Set upload timeout                                                                                                                                                               |
-| toggleAs           | ElementType `('button')`                                                                                                     | You can use a custom element for this component                                                                                                                                  |
+| toggleAs           | ElementType ([Button](/components/button/))                                                                                  | You can use a custom element for this component                                                                                                                                  |
 | withCredentials    | boolean                                                                                                                      | Whether to carry cookies when uploading requests                                                                                                                                 |
 
 <!--{include:(_common/types/file-type.md)}-->

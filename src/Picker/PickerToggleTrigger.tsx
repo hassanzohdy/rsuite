@@ -1,24 +1,25 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import pick from 'lodash/pick';
 import OverlayTrigger, {
-  OverlayTriggerInstance,
+  OverlayTriggerHandle,
+  OverlayTriggerProps,
   OverlayTriggerType
 } from '../Overlay/OverlayTrigger';
 import { PositionChildProps } from '../Overlay/Position';
 import { placementPolyfill } from '../utils';
-import { CustomConsumer } from '../CustomProvider';
+import { CustomContext } from '../CustomProvider';
 import { TypeAttributes, AnimationEventProps } from '../@types/common';
 
-export type { OverlayTriggerInstance, PositionChildProps };
+export type { OverlayTriggerHandle, PositionChildProps };
 
 export interface PickerToggleTriggerProps
-  extends Omit<AnimationEventProps, 'onEntering' | 'onExiting'> {
+  extends Omit<AnimationEventProps, 'onEntering' | 'onExiting'>,
+    Pick<OverlayTriggerProps, 'speaker' | 'onClose'> {
   placement?: TypeAttributes.Placement;
   pickerProps: any;
   open?: boolean;
   trigger?: OverlayTriggerType | OverlayTriggerType[];
   children: React.ReactElement | ((props: any, ref) => React.ReactElement);
-  speaker: React.ReactElement | ((props: any, ref: React.RefObject<any>) => React.ReactElement);
 }
 
 export const omitTriggerPropKeys = [
@@ -36,25 +37,31 @@ export const omitTriggerPropKeys = [
   'preventOverflow'
 ];
 
-export const pickTriggerPropKeys = [...omitTriggerPropKeys, 'disabled', 'plaintext', 'readOnly'];
+export const pickTriggerPropKeys = [
+  ...omitTriggerPropKeys,
+  'disabled',
+  'plaintext',
+  'readOnly',
+  'loading'
+];
 
 const PickerToggleTrigger = React.forwardRef(
   (props: PickerToggleTriggerProps, ref: React.Ref<any>) => {
     const { pickerProps, speaker, placement, trigger = 'click', ...rest } = props;
 
+    const pickerTriggerProps = pick(pickerProps, pickTriggerPropKeys);
+
+    const context = useContext(CustomContext);
     return (
-      <CustomConsumer>
-        {context => (
-          <OverlayTrigger
-            {...rest}
-            {...pick(pickerProps, pickTriggerPropKeys)}
-            ref={ref}
-            trigger={trigger}
-            placement={placementPolyfill(placement, context?.rtl)}
-            speaker={speaker}
-          />
-        )}
-      </CustomConsumer>
+      <OverlayTrigger
+        {...rest}
+        {...pickerTriggerProps}
+        disabled={pickerTriggerProps.disabled || pickerTriggerProps.loading}
+        ref={ref}
+        trigger={trigger}
+        placement={placementPolyfill(placement, context?.rtl)}
+        speaker={speaker}
+      />
     );
   }
 );

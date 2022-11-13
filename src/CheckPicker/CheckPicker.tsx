@@ -34,20 +34,23 @@ import {
   useToggleKeyDownEvent,
   pickTriggerPropKeys,
   omitTriggerPropKeys,
-  OverlayTriggerInstance,
+  OverlayTriggerHandle,
   PositionChildProps,
   listPickerPropTypes,
-  PickerInstance
+  PickerHandle,
+  PickerToggleProps
 } from '../Picker';
 
 import { ItemDataType, FormControlPickerProps } from '../@types/common';
 import type { MultipleSelectProps } from '../SelectPicker';
 import { TreeNodeType } from '../CheckTreePicker/utils';
+import { ListHandle } from '../Windowing';
 
 export type ValueType = (number | string)[];
 export interface CheckPickerProps<T>
   extends FormControlPickerProps<T[], PickerLocale, ItemDataType<T>>,
-    MultipleSelectProps<T> {
+    MultipleSelectProps<T>,
+    Pick<PickerToggleProps, 'label' | 'caretAs'> {
   /** Top the selected option in the options */
   sticky?: boolean;
 
@@ -60,7 +63,7 @@ const emptyArray = [];
 export interface CheckPickerComponent {
   <T>(
     props: CheckPickerProps<T> & {
-      ref?: Ref<PickerInstance>;
+      ref?: Ref<PickerHandle>;
     }
   ): JSX.Element | null;
   displayName?: string;
@@ -68,7 +71,7 @@ export interface CheckPickerComponent {
 }
 
 const CheckPicker = React.forwardRef(
-  <T extends number | string>(props: CheckPickerProps<T>, ref: React.Ref<PickerInstance>) => {
+  <T extends number | string>(props: CheckPickerProps<T>, ref: React.Ref<PickerHandle>) => {
     const {
       as: Component = 'div',
       appearance = 'default',
@@ -117,10 +120,11 @@ const CheckPicker = React.forwardRef(
       ...rest
     } = props;
 
-    const triggerRef = useRef<OverlayTriggerInstance>(null);
+    const triggerRef = useRef<OverlayTriggerHandle>(null);
     const targetRef = useRef<HTMLButtonElement>(null);
     const overlayRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
+    const listRef = useRef<ListHandle>(null);
     const { locale } = useCustom<PickerLocale>('Picker', overrideLocale);
     const [value, setValue] = useControlled(valueProp, defaultValue || []);
 
@@ -269,7 +273,7 @@ const CheckPicker = React.forwardRef(
       onClose?.();
     }, [onClose, setFocusItemValue, setSearchKeyword]);
 
-    usePublicMethods(ref, { triggerRef, overlayRef, targetRef });
+    usePublicMethods(ref, { triggerRef, overlayRef, targetRef, listRef });
 
     const selectedItems =
       data.filter(item => value?.some(val => shallowEqual(item[valueKey], val))) || [];
@@ -330,6 +334,7 @@ const CheckPicker = React.forwardRef(
           <DropdownMenu<true>
             id={id ? `${id}-listbox` : undefined}
             listProps={listProps}
+            listRef={listRef}
             disabledItemValues={disabledItemValues}
             valueKey={valueKey}
             labelKey={labelKey}

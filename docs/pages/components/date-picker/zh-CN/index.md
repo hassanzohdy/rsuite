@@ -2,7 +2,7 @@
 
 时间选择器，可以选择日期和时间。
 
-> 当需要选择日期范围，推荐使用 [`<DateRangePicker>`](/zh/components/date-range-picker)
+> 当需要选择日期范围，推荐使用 [DateRangePicker](/zh/components/date-range-picker)。
 
 ## 获取组件
 
@@ -62,6 +62,12 @@
 
 <!--{include:`disabled.md`}-->
 
+### 禁用输入
+
+`DatePicker` 默认是可以通过键盘输入日期和时间的，如果您希望禁用它，可以通过设置 `editable={false}` 来禁用编辑。
+
+<!--{include:`editable.md`}-->
+
 ### 设置本地语言
 
 `DatePicker` 支持本地语言自定义配置，但是我们更推荐使用统一[国际化](/guide/intl)配置。
@@ -111,6 +117,7 @@
 | appearance            | 'default' &#124; 'subtle' `('default')`                         | 设置外观                                                                    |
 | block                 | boolean                                                         | 堵塞整行                                                                    |
 | calendarDefaultDate   | Date                                                            | 日历面板默认呈现的日期时间                                                  |
+| caretAs               | ElementType                                                     | 自定义右侧箭头图标的组件                                                    |
 | cleanable             | boolean `(true)`                                                | 可以清除                                                                    |
 | container             | HTMLElement &#124; (() => HTMLElement)                          | 设置渲染的容器                                                              |
 | defaultOpen           | boolean                                                         | 默认打开                                                                    |
@@ -120,6 +127,7 @@
 | disabledHours         | (hour:number, date:Date) => boolean                             | 禁用小时                                                                    |
 | disabledMinutes       | (minute:number, date:Date) => boolean                           | 禁用分钟                                                                    |
 | disabledSeconds       | (second:number, date:Date) => boolean                           | 禁用秒                                                                      |
+| editable              | boolean `(true)`                                                | 渲染为 Input 输入框，可以通过键盘输入日期                                   |
 | format                | string `('yyyy-MM-dd')`                                         | 日期显示格式化                                                              |
 | hideHours             | (hour:number, date:Date) => boolean                             | 隐藏小时                                                                    |
 | hideMinutes           | (minute:number, date:Date) => boolean                           | 隐藏分钟                                                                    |
@@ -150,14 +158,13 @@
 | placeholder           | string                                                          | 没有值时候默认显示内容                                                      |
 | placement             | [Placement](#code-ts-placement-code) `('bottomStart')`          | 显示位置                                                                    |
 | preventOverflow       | boolean                                                         | 防止浮动元素溢出                                                            |
-| ranges                | [Range](#code-ts-range-code)[] ([Ranges](#code-ts-ranges-code)) | 快捷项配置                                                                  |
+| ranges                | [Range[]](#code-ts-range-code) ([Ranges](#code-ts-ranges-code)) | 快捷项配置                                                                  |
 | showMeridian          | boolean                                                         | 显示 12 小时制的时间格式                                                    |
 | showWeekNumbers       | boolean                                                         | 显示周数量                                                                  |
 | size                  | 'lg' &#124; 'md' &#124; 'sm' &#124; 'xs' `('md')`               | 组件设置尺寸                                                                |
 | timeZone              | string                                                          | [IANA 时区名](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) |
 | toggleAs              | ElementType `('a')`                                             | 为组件自定义元素类型                                                        |
 | value                 | Date                                                            | 值`受控                                                                     |
-| caretAs               | ElementType                                                     | 自定义右侧箭头图标的组件                                                    |
 
 <!--{include:(_common/types/placement.md)}-->
 <!--{include:(_common/types/range.md)}-->

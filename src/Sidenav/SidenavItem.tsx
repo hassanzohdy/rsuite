@@ -1,15 +1,17 @@
 import React, { useContext, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import isNil from 'lodash/isNil';
-import { useClassNames, shallowEqual, mergeRefs, appendTooltip } from '../utils';
+import { useClassNames, shallowEqual, mergeRefs, createChainedFunction } from '../utils';
 import { WithAsProps, RsRefForwardingComponent } from '../@types/common';
 import { IconProps } from '@rsuite/icons/lib/Icon';
 import Ripple from '../Ripple';
 import SafeAnchor from '../SafeAnchor';
-import NavContext from '../Nav/NavContext';
+import NavContext, { NavContextProps } from '../Nav/NavContext';
 import MenuItem from '../Menu/MenuItem';
 import omit from 'lodash/omit';
 import { SidenavContext } from './Sidenav';
+import Whisper, { WhisperInstance } from '../Whisper';
+import Tooltip from '../Tooltip';
 
 export interface SidenavItemProps<T = any>
   extends WithAsProps,
@@ -32,12 +34,28 @@ export interface SidenavItemProps<T = any>
   divider?: boolean;
 
   panel?: boolean;
+
+  /**
+   * Content of the tooltip
+   */
+  tooltip?: React.ReactNode;
 }
 
+/**
+ * @private
+ */
 const SidenavItem: RsRefForwardingComponent<'li', SidenavItemProps> = React.forwardRef<
   HTMLLIElement,
   SidenavItemProps
 >((props: SidenavItemProps, ref) => {
+  const sidenav = useContext(SidenavContext);
+
+  if (!sidenav) {
+    throw new Error(
+      '<SidenavItem> component is not supposed to be used standalone. Use <Nav.Item> inside <Sidenav> instead.'
+    );
+  }
+
   const {
     as: Component = SafeAnchor,
     active: activeProp,
@@ -52,27 +70,19 @@ const SidenavItem: RsRefForwardingComponent<'li', SidenavItemProps> = React.forw
     onSelect,
     divider,
     panel,
+    tooltip = children,
     ...rest
   } = props;
 
-  const sidenav = useContext(SidenavContext);
-
-  if (!sidenav) {
-    throw new Error(
-      '<SidenavItem> component is not supposed to be used standalone. Use <Nav.Item> inside <Sidenav> instead.'
-    );
-  }
-
-  const { activeKey, onSelect: onSelectFromNav } = useContext(NavContext);
-
+  const { activeKey, onSelect: onSelectFromNav } = useContext(NavContext) as NavContextProps;
   const { merge, withClassPrefix, prefix } = useClassNames(classPrefix);
-
   const selected = activeProp ?? (!isNil(eventKey) && shallowEqual(activeKey, eventKey));
+  const whisperRef = React.useRef<WhisperInstance>(null);
 
   const handleClick = useCallback<React.MouseEventHandler<HTMLElement>>(
     event => {
       if (disabled) return;
-
+      whisperRef.current?.close();
       onSelect?.(eventKey, event);
       onSelectFromNav?.(eventKey, event);
       onClick?.(event);
@@ -82,16 +92,21 @@ const SidenavItem: RsRefForwardingComponent<'li', SidenavItemProps> = React.forw
 
   if (!sidenav.expanded) {
     return (
-      <MenuItem selected={selected} disabled={disabled} onActivate={handleClick}>
-        {({ selected, active, ...menuitem }, menuitemRef) => {
-          const classes = merge(
-            className,
-            withClassPrefix({ focus: active, active: selected, disabled })
-          );
+      <Whisper
+        trigger="hover"
+        speaker={<Tooltip>{tooltip}</Tooltip>}
+        placement="right"
+        ref={whisperRef}
+      >
+        {(triggerProps, triggerRef) => (
+          <MenuItem selected={selected} disabled={disabled} onActivate={handleClick}>
+            {({ selected, active, ...menuitem }, menuitemRef) => {
+              const classes = merge(
+                className,
+                withClassPrefix({ focus: active, active: selected, disabled })
+              );
 
-          // Show tooltip when inside a collapse <Sidenav>
-          return appendTooltip({
-            children: (triggerProps, triggerRef) => {
+              // Show tooltip when inside a collapse <Sidenav>
               return (
                 <Component
                   ref={mergeRefs(mergeRefs(ref, menuitemRef), triggerRef as any)}
@@ -101,18 +116,21 @@ const SidenavItem: RsRefForwardingComponent<'li', SidenavItemProps> = React.forw
                   {...omit(rest, ['divider', 'panel'])}
                   {...triggerProps}
                   {...menuitem}
+                  onMouseOver={createChainedFunction(
+                    menuitem.onMouseOver,
+                    triggerProps.onMouseOver
+                  )}
+                  onMouseOut={createChainedFunction(menuitem.onMouseOut, triggerProps.onMouseOut)}
                 >
-                  {icon}
+                  {icon && React.cloneElement(icon, { className: prefix('icon') })}
                   {children}
                   <Ripple />
                 </Component>
               );
-            },
-            message: children,
-            placement: 'right'
-          });
-        }}
-      </MenuItem>
+            }}
+          </MenuItem>
+        )}
+      </Whisper>
     );
   }
 
@@ -152,7 +170,7 @@ const SidenavItem: RsRefForwardingComponent<'li', SidenavItemProps> = React.forw
       data-event-key={eventKey}
       {...rest}
     >
-      {icon}
+      {icon && React.cloneElement(icon, { className: prefix('icon') })}
       {children}
       <Ripple />
     </Component>

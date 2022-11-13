@@ -1,11 +1,15 @@
 <!--start-code-->
 
 ```js
+import { Message, useToaster, ButtonToolbar, SelectPicker, Button } from 'rsuite';
+
 const App = () => {
   const [type, setType] = React.useState('info');
   const [placement, setPlacement] = React.useState('topCenter');
+  const toaster = useToaster();
+
   const message = (
-    <Message showIcon type={type} >
+    <Message showIcon type={type}>
       {type}: The message appears on the {placement}.
     </Message>
   );
@@ -49,7 +53,7 @@ const App = () => {
   );
 };
 
-ReactDOM.render(<App />);
+ReactDOM.render(<App />, document.getElementById('root'));
 ```
 
 <!--end-code-->

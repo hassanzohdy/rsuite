@@ -11,7 +11,7 @@ A text tip for secondary, which replaces the default title property of an HTML e
 
 ## Examples
 
-### Default
+### Basic
 
 <!--{include:`basic.md`}-->
 
@@ -49,16 +49,28 @@ Elements with the disabled attribute aren’t interactive, meaning users cannot 
 
 <!--{include:`disabled-elements.md`}-->
 
-## Props
+### Hide arrow indicator
 
-<!--{include:(_common/types/placement-all.md)}-->
+You can hide arrow indicator by setting `arrow` props to `false`;
+
+<!--{include:`arrow.md`}-->
+
+### Follow cursor
+
+You can enable the `Tooltip` to follow the cursor by setting `followCursor={true}`.
+
+<!--{include:`follow-cursor.md`}-->
+
+## Props
 
 ### `<Tooltip>`
 
 | Property    | Type `(Default)`     | Description                           |
 | ----------- | -------------------- | ------------------------------------- |
+| arrow       | boolean `(true)`     | Whether show the arrow indicator      |
 | children \* | ReactNode            | The content of the component.         |
 | classPrefix | string `('tooltip')` | The prefix of the component CSS class |
 | visible     | boolean              | The component is visible by default   |
 
 <!--{include:(components/whisper/en-US/props.md)}-->
+<!--{include:(_common/types/placement-all.md)}-->

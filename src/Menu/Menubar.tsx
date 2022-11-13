@@ -5,6 +5,7 @@ import MenuContext, { MenuActionTypes, MoveFocusTo } from './MenuContext';
 import { KEY_VALUES, useCustom } from '../utils';
 import { isFocusEntering, isFocusLeaving } from '../utils/events';
 import useMenu from './useMenu';
+import { isFocusableElement } from '../utils/dom';
 
 export interface MenubarProps {
   /** Whether menubar is arranged in vertical form, defaults to false */
@@ -20,6 +21,9 @@ export interface MenubarProps {
   onActivateItem?: (event: React.SyntheticEvent) => void;
 }
 
+/**
+ * @private
+ */
 export default function Menubar({ vertical = false, children, onActivateItem }: MenubarProps) {
   const menubar = useMenu({ role: 'menubar' });
   const [{ items, activeItemIndex }, dispatch] = menubar;
@@ -29,7 +33,11 @@ export default function Menubar({ vertical = false, children, onActivateItem }: 
   const onFocus = useCallback(
     (event: React.FocusEvent) => {
       // Focus moves inside Menubar
-      if (isFocusEntering(event)) {
+      if (
+        isFocusEntering(event) &&
+        // Skip if focus is moving to a focusable element within this menu
+        !(event.target !== event.currentTarget && isFocusableElement(event.target))
+      ) {
         if (activeItemIndex === null) {
           dispatch({ type: MenuActionTypes.MoveFocus, to: MoveFocusTo.First });
         }
@@ -54,7 +62,7 @@ export default function Menubar({ vertical = false, children, onActivateItem }: 
     (event: React.KeyboardEvent<HTMLUListElement>) => {
       const activeItemElement: HTMLElement | null = isNil(activeItemIndex)
         ? null
-        : items[activeItemIndex].element;
+        : items[activeItemIndex]?.element ?? null;
       switch (true) {
         case !vertical && !rtl && event.key === KEY_VALUES.RIGHT:
         case !vertical && rtl && event.key === KEY_VALUES.LEFT:
@@ -135,7 +143,7 @@ export default function Menubar({ vertical = false, children, onActivateItem }: 
           onClick,
           'aria-activedescendant': isNil(activeItemIndex)
             ? undefined
-            : items[activeItemIndex].element.id,
+            : items[activeItemIndex]?.element.id,
           'aria-orientation': vertical ? 'vertical' : undefined // implicitly set 'horizontal'
         },
         menubarElementRef

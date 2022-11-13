@@ -1,15 +1,20 @@
 import React, { useState, useRef, useCallback, useContext } from 'react';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
-import Position, { PositionProps } from './Position';
-import { TypeAttributes, AnimationEventProps } from '../@types/common';
+import Position, { PositionChildProps, PositionProps } from './Position';
+import { TypeAttributes, AnimationEventProps, CursorPosition } from '../@types/common';
 import { mergeRefs, useRootClose } from '../utils';
 import Fade from '../Animation/Fade';
 import OverlayContext from './OverlayContext';
 
 export interface OverlayProps extends AnimationEventProps {
   container?: HTMLElement | (() => HTMLElement | null) | null;
-  children: React.ReactElement | ((props: any, ref) => React.ReactElement);
+  children:
+    | React.ReactElement
+    | ((
+        props: PositionChildProps & React.HTMLAttributes<HTMLElement>,
+        ref: React.RefCallback<HTMLElement>
+      ) => React.ReactElement);
   childrenProps?: React.HTMLAttributes<HTMLElement>;
   className?: string;
   containerPadding?: number;
@@ -20,6 +25,8 @@ export interface OverlayProps extends AnimationEventProps {
   transition?: React.ElementType;
   triggerTarget?: React.RefObject<any>;
   onClose?: React.ReactEventHandler;
+  followCursor?: boolean;
+  cursorPosition?: CursorPosition | null;
 }
 
 export const overlayPropTypes = {
@@ -62,7 +69,9 @@ const Overlay = React.forwardRef((props: OverlayProps, ref) => {
     onExiting,
     onEnter,
     onEntering,
-    onEntered
+    onEntered,
+    followCursor,
+    cursorPosition
   } = props;
 
   const [exited, setExited] = useState(!open);
@@ -95,7 +104,9 @@ const Overlay = React.forwardRef((props: OverlayProps, ref) => {
     containerPadding,
     triggerTarget,
     placement,
-    preventOverflow
+    preventOverflow,
+    followCursor,
+    cursorPosition
   };
 
   const renderChildWithPosition = (transitionProps?, transitionRef?: React.RefObject<any>) => {

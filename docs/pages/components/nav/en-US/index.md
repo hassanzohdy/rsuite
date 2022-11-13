@@ -8,7 +8,7 @@ Provides a list of various forms of navigation menus, which can be landscape and
 
 ## Examples
 
-### Default
+### Basic
 
 <!--{include:`basic.md`}-->
 
@@ -39,8 +39,6 @@ Provides a list of various forms of navigation menus, which can be landscape and
 
 <!--{include:`dropdown.md`}-->
 
-> Use the `<Dropdown>` component directly when using multi-level navigation.
-
 ### With Icon
 
 <!--{include:`icon.md`}-->
@@ -48,6 +46,8 @@ Provides a list of various forms of navigation menus, which can be landscape and
 ### Used with `Link` in `next/link`
 
 <!--{include:`with-router.md`}-->
+
+> [ Used with `Link` in React Router](/guide/composition/#react-router-dom)
 
 ### Responsive
 
@@ -84,6 +84,14 @@ Provides a list of various forms of navigation menus, which can be landscape and
 | icon        | Element&lt;typeof Icon&gt;        | Sets the icon for the component                       |
 | onSelect    | (eventKey: string, event) => void | Select the callback function that the event triggers. |
 
-### `<Nav.Dropdown>`
+### `<Nav.Menu>`
 
-- [Extend the Dropdown component](/components/dropdown#Props)
+| Property      | Type `(Default)`                               | Description                                                    |
+| ------------- | ---------------------------------------------- | -------------------------------------------------------------- |
+| icon          | ReactElement                                   | Icon of the item that opens the menu                           |
+| noCaret       | boolean `(false)`                              | Whether to hide the caret icon                                 |
+| onClose       | (event: SyntheticEvent) => void                | Callback when menu closes                                      |
+| onOpen        | (event: SyntheticEvent) => void                | Callback when menu opens                                       |
+| onToggle      | (open: boolean, event: SyntheticEvent) => void | Callback when menu opens/closes                                |
+| openDirection | "start"&#124;"end" `("end")`                   | Direction that menu opens towards (only available on submenus) |
+| title         | ReactNode                                      | Content of the item that opens the menu                        |

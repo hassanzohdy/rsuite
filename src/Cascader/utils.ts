@@ -4,6 +4,7 @@ import { shallowEqual, useUpdateEffect } from '../utils';
 import { CascaderProps } from './Cascader';
 import { ItemDataType } from '../@types/common';
 import { findNodeOfTree } from '../utils/treeUtils';
+import { attachParent } from '../utils/attachParent';
 
 export function getColumnsAndPaths<T extends ItemDataType>(data: T[], value, options) {
   const { childrenKey, valueKey, isAttachChildren } = options;
@@ -19,7 +20,7 @@ export function getColumnsAndPaths<T extends ItemDataType>(data: T[], value, opt
         const node = findNode(children);
 
         if (node) {
-          columns.push(children.map(item => ({ ...item, parent: items[i] })));
+          columns.push(children.map(item => attachParent(item, items[i])));
           paths.push(node.active);
 
           return { items, active: items[i] };
@@ -76,6 +77,14 @@ export function usePaths(props: CascaderProps) {
   }
 
   /**
+   * Remove subsequent columns of the specified column
+   * @param index
+   */
+  function romoveColumnByIndex(index: number) {
+    setColumnData([...slice(columnData, 0, index)]);
+  }
+
+  /**
    * Enforce update of columns and paths.
    * @param nextValue  Selected value
    * @param isAttachChildren  Whether to attach the children of the selected node.
@@ -108,6 +117,7 @@ export function usePaths(props: CascaderProps) {
     setValueToPaths,
     setColumnData,
     setSelectedPaths,
-    addColumn
+    addColumn,
+    romoveColumnByIndex
   };
 }

@@ -8,7 +8,7 @@ CheckTreePicker are supported in multiple selectors for multiple selection of co
 
 ## Examples
 
-### Default
+### Basic
 
 <!--{include:`basic.md`}-->
 
@@ -42,6 +42,10 @@ The cascade attribute can set whether or not CheckTreePicker can consider the ca
 
 <!--{include:`async.md`}-->
 
+### Extra footer
+
+<!--{include:`extra-footer.md`}-->
+
 ## Accessibility
 
 Learn more in [Accessibility](/guide/accessibility).
@@ -69,7 +73,7 @@ Learn more in [Accessibility](/guide/accessibility).
 | getChildren             | (item: [ItemDataType][item]) => Promise&lt;[ItemDataType][item]&gt;                                | load node children data asynchronously                                    |
 | height                  | number `(360px)`                                                                                   | height of menu. When `virtualize` is true, you can set the height of menu |
 | labelKey                | string `('label')`                                                                                 | set label key in data                                                     |
-| listProps               | [ListProps][listprops]                                                                             | List-related properties in `react-virtualized`                            |
+| listProps               | [ListProps][listprops]                                                                             | Properties of virtualized lists.                                          |
 | locale                  | [PickerLocaleType](/guide/i18n/#pickers)                                                           | Locale text                                                               |
 | menuClassName           | string                                                                                             | className for Menu                                                        |
 | menuStyle               | CSSProperties                                                                                      | style for Menu                                                            |
@@ -107,6 +111,7 @@ Learn more in [Accessibility](/guide/accessibility).
 
 <!--{include:(_common/types/item-data-type.md)}-->
 <!--{include:(_common/types/placement.md)}-->
+<!--{include:(_common/types/list-props.md)}-->
 
 ## Related Components
 
@@ -114,5 +119,5 @@ Learn more in [Accessibility](/guide/accessibility).
 - [`<Tree>`](/components/tree)
 - [`<TreePicker>`](/components/tree-picker)
 
-[listprops]: https://github.com/bvaughn/react-virtualized/blob/master/docs/List.md#prop-types
+[listprops]: #code-ts-list-props-code
 [item]: #code-ts-item-data-type-code

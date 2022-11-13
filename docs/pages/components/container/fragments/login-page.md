@@ -1,14 +1,27 @@
 <!--start-code-->
 
 ```js
-const instance = (
+import {
+  Container,
+  Header,
+  Content,
+  Footer,
+  Form,
+  ButtonToolbar,
+  Button,
+  Navbar,
+  Panel,
+  FlexboxGrid
+} from 'rsuite';
+
+const App = () => (
   <div className="show-fake-browser login-page">
     <Container>
       <Header>
         <Navbar appearance="inverse">
-          <Navbar.Header>
-            <a className="navbar-brand logo">Brand</a>
-          </Navbar.Header>
+          <Navbar.Brand>
+            <a style={{ color: '#fff' }}>Brand</a>
+          </Navbar.Brand>
         </Navbar>
       </Header>
       <Content>
@@ -39,7 +52,7 @@ const instance = (
     </Container>
   </div>
 );
-ReactDOM.render(instance);
+ReactDOM.render(<App />, document.getElementById('root'));
 ```
 
 <!--end-code-->

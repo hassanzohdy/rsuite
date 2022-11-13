@@ -1,10 +1,12 @@
 import pick from 'lodash/pick';
 import omitBy from 'lodash/omitBy';
 import getHours from 'date-fns/getHours';
+import setHours from 'date-fns/setHours';
 import getDay from 'date-fns/getDay';
 import getMinutes from 'date-fns/getMinutes';
 import getSeconds from 'date-fns/getSeconds';
 import addDays from 'date-fns/addDays';
+import set from 'date-fns/set';
 
 export { default as addDays } from 'date-fns/addDays';
 export { default as addMonths } from 'date-fns/addMonths';
@@ -43,6 +45,8 @@ export { default as startOfWeek } from 'date-fns/startOfWeek';
 export { default as subDays } from 'date-fns/subDays';
 export { default as isMatch } from 'date-fns/isMatch';
 export { default as isValid } from 'date-fns/isValid';
+export { default as set } from 'date-fns/set';
+export { default as differenceInCalendarMonths } from 'date-fns/differenceInCalendarMonths';
 
 const disabledTimeProps = ['disabledHours', 'disabledMinutes', 'disabledSeconds'];
 const hideTimeProps = ['hideHours', 'hideMinutes', 'hideSeconds'];
@@ -89,14 +93,14 @@ export const omitHideDisabledProps = <T extends Record<string, any>>(
 ): Partial<Omit<T, CalendarOnlyPropsType>> =>
   omitBy<T>(props, (_val, key) => key.startsWith('disabled') || key.startsWith('hide'));
 
-export const shouldTime = (format: string) => /([Hhms])/.test(format);
+export const shouldRenderTime = (format: string) => /([Hhms])/.test(format);
 
-export const shouldMonth = (format: string) => /[Yy]/.test(format) && /[ML]/.test(format);
+export const shouldRenderMonth = (format: string) => /[Yy]/.test(format) && /[ML]/.test(format);
 
-export const shouldDate = (format: string): boolean =>
+export const shouldRenderDate = (format: string): boolean =>
   /[Yy]/.test(format) && /[ML]/.test(format) && /[Dd]/.test(format); // for date-fns v1 and v2
 
-export const shouldOnlyTime = (format: string) =>
+export const shouldOnlyRenderTime = (format: string) =>
   /([Hhms])/.test(format) && !/([YyMDd])/.test(format); // for date-fns v1 and v2
 
 /**
@@ -134,3 +138,37 @@ export function getDateMask(formatStr: string) {
     return i.match(/[A-Za-z]/) ? /[\d|A-Za-z]/ : i;
   });
 }
+
+/**
+ * Copy the time of one date to another
+ */
+export function copyTime({ from, to }: { from: Date; to: Date }) {
+  return set(to, {
+    hours: getHours(from),
+    minutes: getMinutes(from),
+    seconds: getSeconds(from)
+  });
+}
+
+/**
+ * Swap two dates without swapping the time.
+ */
+export function reverseDateRangeOmitTime(dateRange: [Date, Date]): [Date, Date] {
+  const [start, end] = dateRange;
+  if (start && end) {
+    return [copyTime({ from: start, to: end }), copyTime({ from: end, to: start })];
+  }
+
+  return dateRange;
+}
+
+/**
+ * Get the time with AM and PM reversed.
+ */
+export const getReversedTimeMeridian = (date: Date) => {
+  const clonedDate = new Date(date.valueOf());
+  const hours = getHours(clonedDate);
+  const nextHours = hours >= 12 ? hours - 12 : hours + 12;
+
+  return setHours(clonedDate, nextHours);
+};

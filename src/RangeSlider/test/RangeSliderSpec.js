@@ -1,9 +1,11 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
-import ReactTestUtils from 'react-dom/test-utils';
+import { render, fireEvent, act } from '@testing-library/react';
+import { Simulate } from 'react-dom/test-utils';
 import { getDOMNode } from '@test/testUtils';
 import { testStandardProps } from '@test/commonCases';
 import RangeSlider from '../RangeSlider';
+
+import '../../Slider/styles/index.less';
 
 describe('RangeSlider', () => {
   testStandardProps(<RangeSlider />);
@@ -45,7 +47,7 @@ describe('RangeSlider', () => {
   it('Should call onChange callback', () => {
     const onChangeSpy = sinon.spy();
     const instance = getDOMNode(<RangeSlider defaultValue={[10, 50]} onChange={onChangeSpy} />);
-    ReactTestUtils.Simulate.click(instance.querySelector('.rs-slider-progress-bar'));
+    fireEvent.click(instance.querySelector('.rs-slider-progress-bar'));
 
     assert.equal(onChangeSpy.firstCall.firstArg[0], 0);
     assert.equal(onChangeSpy.firstCall.firstArg[1], 50);
@@ -89,22 +91,22 @@ describe('RangeSlider', () => {
 
     assert.equal(input.value, '10');
 
-    ReactTestUtils.Simulate.keyDown(handle, { key: 'ArrowUp' });
+    fireEvent.keyDown(handle, { key: 'ArrowUp' });
     assert.equal(input.value, '11');
 
-    ReactTestUtils.Simulate.keyDown(handle, { key: 'ArrowRight' });
+    fireEvent.keyDown(handle, { key: 'ArrowRight' });
     assert.equal(input.value, '12');
 
-    ReactTestUtils.Simulate.keyDown(handle, { key: 'ArrowDown' });
+    fireEvent.keyDown(handle, { key: 'ArrowDown' });
     assert.equal(input.value, '11');
 
-    ReactTestUtils.Simulate.keyDown(handle, { key: 'ArrowLeft' });
+    fireEvent.keyDown(handle, { key: 'ArrowLeft' });
     assert.equal(input.value, '10');
 
-    ReactTestUtils.Simulate.keyDown(handle, { key: 'Home' });
+    fireEvent.keyDown(handle, { key: 'Home' });
     assert.equal(input.value, '0');
 
-    ReactTestUtils.Simulate.keyDown(handle, { key: 'End' });
+    fireEvent.keyDown(handle, { key: 'End' });
     assert.equal(input.value, '100');
   });
 
@@ -114,7 +116,7 @@ describe('RangeSlider', () => {
     const instance = getDOMNode(<RangeSlider onChangeCommitted={() => done()} />);
 
     const handle = instance.querySelector('.rs-slider-handle');
-    ReactTestUtils.Simulate.mouseDown(handle);
+    fireEvent.mouseDown(handle);
     handle.dispatchEvent(mousemoveEvent);
     handle.dispatchEvent(mouseupEvent);
 
@@ -123,7 +125,7 @@ describe('RangeSlider', () => {
 
   it('Should call `onChange` callback', done => {
     const instance = getDOMNode(<RangeSlider onChange={() => done()} />);
-    ReactTestUtils.Simulate.click(instance.querySelector('.rs-slider-bar'));
+    fireEvent.click(instance.querySelector('.rs-slider-bar'));
   });
 
   it('Should output an `input` stored value', () => {
@@ -142,5 +144,35 @@ describe('RangeSlider', () => {
     assert.equal(input[1].getAttribute('aria-valuemax'), 100);
     assert.equal(input[1].getAttribute('aria-valuemin'), 10);
     assert.equal(input[1].getAttribute('aria-orientation'), 'horizontal');
+  });
+
+  it('Should be reversed start and end values', () => {
+    const onChangeSpy = sinon.spy();
+    const instance = getDOMNode(
+      <RangeSlider
+        style={{ height: 100 }}
+        defaultValue={[10, 50]}
+        onChange={onChangeSpy}
+        vertical
+      />
+    );
+
+    const sliderBar = instance.querySelector('.rs-slider-bar');
+
+    act(() => {
+      Simulate.click(sliderBar, { pageX: 0, pageY: 80 });
+    });
+
+    act(() => {
+      Simulate.click(sliderBar, { pageX: 0, pageY: 0 });
+    });
+
+    assert.deepEqual(onChangeSpy.firstCall.firstArg, [20, 50]);
+
+    /**
+     * fix: https://github.com/rsuite/rsuite/issues/2425
+     * Error thrown before fix: expected [ 100, 20 ] to deeply equal [ 20, 100 ]
+     */
+    assert.deepEqual(onChangeSpy.secondCall.firstArg, [20, 100]);
   });
 });

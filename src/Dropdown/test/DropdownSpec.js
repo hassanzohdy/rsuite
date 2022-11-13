@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactTestUtils, { act, Simulate } from 'react-dom/test-utils';
+import { fireEvent, render, act } from '@testing-library/react';
 import { getDOMNode } from '@test/testUtils';
 import Dropdown from '../Dropdown';
 import Button from '../../Button';
@@ -30,41 +30,52 @@ function renderDropdown(ui) {
 
 describe('<Dropdown>', () => {
   it('Should render a button that controls a popup menu', () => {
-    const instance = getDOMNode(
+    const { getByRole } = render(
       <Dropdown title="Menu">
-        <Dropdown.Item>1</Dropdown.Item>
-        <Dropdown.Item>2</Dropdown.Item>
-        {null}
-        <div>abc</div>
+        <Dropdown.Item>Item 1</Dropdown.Item>
       </Dropdown>
     );
 
-    const button = instance.querySelector('[role="button"]');
-    expect(button, 'The button').not.to.be.null;
-    expect(button.textContent, 'Button text').to.equal('Menu');
-    assert.equal(button.getAttribute('aria-haspopup'), 'menu', 'The button controls a popup menu');
-
-    const menu = instance.querySelector('[role="menu"]');
-
-    assert.isTrue(menu.hidden, 'The menu is closed initially.');
+    expect(getByRole('button')).to.have.text('Menu').and.to.have.attr('aria-haspopup', 'menu');
   });
 
   it('Should open the menu when button is clicked', () => {
-    const instance = getDOMNode(
-      <Dropdown>
+    const { getByRole } = render(
+      <Dropdown title="Menu">
         <Dropdown.Item>Item 1</Dropdown.Item>
-        <Dropdown.Item>Item 2</Dropdown.Item>
-        <Dropdown.Item>Item 3</Dropdown.Item>
       </Dropdown>
     );
-    const button = instance.querySelector('[role="button"]');
-    ReactTestUtils.act(() => {
-      ReactTestUtils.Simulate.click(button);
-    });
+    fireEvent.click(getByRole('button', { name: 'Menu' }));
 
-    const menu = instance.querySelector('[role="menu"]');
+    expect(getByRole('menu')).to.be.visible;
+  });
 
-    assert.isFalse(menu.hidden, 'The menu is opened');
+  it('Should open menu initially when defaultOpen=true', () => {
+    const { getByRole } = render(
+      <Dropdown title="Menu" defaultOpen>
+        <Dropdown.Item>Item 1</Dropdown.Item>
+      </Dropdown>
+    );
+
+    expect(getByRole('menu')).to.be.visible;
+  });
+
+  it('Should display/hide menu according to controlled `open` prop', () => {
+    const { getByRole, queryByRole, rerender } = render(
+      <Dropdown title="Menu" open>
+        <Dropdown.Item>Item 1</Dropdown.Item>
+      </Dropdown>
+    );
+
+    expect(getByRole('menu')).to.be.visible;
+
+    rerender(
+      <Dropdown title="Menu" open={false}>
+        <Dropdown.Item>Item 1</Dropdown.Item>
+      </Dropdown>
+    );
+
+    expect(queryByRole('menu')).not.to.exist;
   });
 
   it('Should toggle the menu on mouseEnter/mouseLeave button given trigger "hover"', () => {
@@ -76,13 +87,13 @@ describe('<Dropdown>', () => {
       </Dropdown>
     );
 
-    ReactTestUtils.act(() => {
+    act(() => {
       button.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
     });
 
     expect(!menu.hidden, 'Menu is open').to.be.true;
 
-    ReactTestUtils.act(() => {
+    act(() => {
       root.dispatchEvent(new MouseEvent('mouseout', { bubbles: true }));
     });
 
@@ -99,7 +110,7 @@ describe('<Dropdown>', () => {
     );
 
     act(() => {
-      Simulate.contextMenu(button);
+      fireEvent.contextMenu(button);
     });
 
     expect(!menu.hidden, 'Menu is open').to.be.true;
@@ -180,9 +191,7 @@ describe('<Dropdown>', () => {
         <Dropdown.Item eventKey={2}>2</Dropdown.Item>
       </Dropdown>
     );
-    ReactTestUtils.Simulate.click(
-      instance.querySelectorAll('.rs-dropdown-menu [role="menuitem"]')[1]
-    );
+    fireEvent.click(instance.querySelectorAll('.rs-dropdown-menu [role="menuitem"]')[1]);
   });
 
   it('Should close menu after clicking an item without submenu', () => {
@@ -196,11 +205,11 @@ describe('<Dropdown>', () => {
 
     // Open the menu
     act(() => {
-      Simulate.click(button);
+      fireEvent.click(button);
     });
 
     act(() => {
-      Simulate.click(instance.querySelector('#menu-item'));
+      fireEvent.click(instance.querySelector('#menu-item'));
     });
     const menu = instance.querySelector('[role="menu"]');
 
@@ -219,11 +228,11 @@ describe('<Dropdown>', () => {
 
     // Open the menu
     act(() => {
-      Simulate.click(button);
+      fireEvent.click(button);
     });
 
     act(() => {
-      Simulate.click(root.querySelector('#submenu-item'));
+      fireEvent.click(root.querySelector('#submenu-item'));
     });
 
     expect(menu.hidden, 'Menu is closed').to.be.true;
@@ -239,7 +248,7 @@ describe('<Dropdown>', () => {
         <Dropdown.Item eventKey={2}>2</Dropdown.Item>
       </Dropdown>
     );
-    ReactTestUtils.Simulate.click(instance.querySelector('.rs-dropdown-toggle'));
+    fireEvent.click(instance.querySelector('.rs-dropdown-toggle'));
   });
 
   it('Should call onOpen callback', done => {
@@ -252,7 +261,7 @@ describe('<Dropdown>', () => {
         <Dropdown.Item eventKey={2}>2</Dropdown.Item>
       </Dropdown>
     );
-    ReactTestUtils.Simulate.click(instance.querySelector('.rs-dropdown-toggle'));
+    fireEvent.click(instance.querySelector('.rs-dropdown-toggle'));
   });
 
   it('Should call onClose callback', done => {
@@ -266,20 +275,50 @@ describe('<Dropdown>', () => {
       </Dropdown>
     );
     const btn = instance.querySelector('.rs-dropdown-toggle');
-    ReactTestUtils.Simulate.click(btn);
-    ReactTestUtils.Simulate.click(btn);
+    fireEvent.click(btn);
+    fireEvent.click(btn);
   });
 
   it('Should not call onToggle callback when set disabled', () => {
     const onToggleSpy = sinon.spy();
-    const instance = getDOMNode(
+    const { getByRole } = render(
       <Dropdown onToggle={onToggleSpy} disabled>
         <Dropdown.Item eventKey={1}>1</Dropdown.Item>
         <Dropdown.Item eventKey={2}>2</Dropdown.Item>
       </Dropdown>
     );
-    ReactTestUtils.Simulate.click(instance.querySelector('.rs-dropdown-toggle'));
-    assert.ok(!onToggleSpy.calledOnce);
+
+    fireEvent.click(getByRole('button'));
+
+    expect(onToggleSpy).to.have.not.been.called;
+  });
+
+  it('Should not call onToggle callback when set disabled and hover', () => {
+    const onToggleSpy = sinon.spy();
+    const { getByRole } = render(
+      <Dropdown onToggle={onToggleSpy} disabled trigger="hover">
+        <Dropdown.Item eventKey={1}>1</Dropdown.Item>
+        <Dropdown.Item eventKey={2}>2</Dropdown.Item>
+      </Dropdown>
+    );
+
+    fireEvent.mouseEnter(getByRole('button'));
+
+    expect(onToggleSpy).to.have.not.been.called;
+  });
+
+  it('Should not call onToggle callback when set disabled and contextMenu', () => {
+    const onToggleSpy = sinon.spy();
+    const { getByRole } = render(
+      <Dropdown onToggle={onToggleSpy} disabled trigger="contextMenu">
+        <Dropdown.Item eventKey={1}>1</Dropdown.Item>
+        <Dropdown.Item eventKey={2}>2</Dropdown.Item>
+      </Dropdown>
+    );
+
+    fireEvent.contextMenu(getByRole('button'));
+
+    expect(onToggleSpy).to.have.not.been.called;
   });
 
   it('Should have a custom style in Menu', () => {
@@ -318,8 +357,8 @@ describe('<Dropdown>', () => {
 
       if (openMenuAfterRendered) {
         // Open the menu
-        ReactTestUtils.act(() => {
-          ReactTestUtils.Simulate.keyDown(button, { key: 'Enter' });
+        act(() => {
+          fireEvent.keyDown(button, { key: 'Enter' });
         });
       }
 
@@ -343,8 +382,8 @@ describe('<Dropdown>', () => {
               </Dropdown>
             );
 
-            ReactTestUtils.act(() => {
-              ReactTestUtils.Simulate.keyDown(button, { key });
+            act(() => {
+              fireEvent.keyDown(button, { key });
             });
 
             assert.isFalse(menu.hidden, 'The menu is open');
@@ -366,8 +405,8 @@ describe('<Dropdown>', () => {
               </Dropdown>
             );
 
-            ReactTestUtils.act(() => {
-              ReactTestUtils.Simulate.keyDown(button, { key });
+            act(() => {
+              fireEvent.keyDown(button, { key });
             });
 
             expect(menu.getAttribute('aria-activedescendant'), 'Active menuitem').to.equal(
@@ -385,8 +424,8 @@ describe('<Dropdown>', () => {
               </Dropdown>
             );
 
-            ReactTestUtils.act(() => {
-              ReactTestUtils.Simulate.keyDown(button, { key });
+            act(() => {
+              fireEvent.keyDown(button, { key });
             });
 
             expect(menu.getAttribute('aria-activedescendant'), 'Active menuitem').to.equal(
@@ -405,8 +444,8 @@ describe('<Dropdown>', () => {
                 true
               );
 
-              ReactTestUtils.act(() => {
-                ReactTestUtils.Simulate.keyDown(button, { key });
+              act(() => {
+                fireEvent.keyDown(button, { key });
               });
 
               expect(menu.hidden, 'The menu is closed').to.be.true;
@@ -431,12 +470,12 @@ describe('<Dropdown>', () => {
             const menu = instance.querySelector('[role="menu"]');
 
             // Open the menu
-            ReactTestUtils.act(() => {
-              ReactTestUtils.Simulate.keyDown(button, { key: 'Enter' });
+            act(() => {
+              fireEvent.keyDown(button, { key: 'Enter' });
             });
 
-            ReactTestUtils.act(() => {
-              ReactTestUtils.Simulate.keyDown(menu, { key });
+            act(() => {
+              fireEvent.keyDown(menu, { key });
             });
 
             const submenu = instance.querySelector('#submenu');
@@ -458,12 +497,12 @@ describe('<Dropdown>', () => {
             const menu = instance.querySelector('[role="menu"]');
 
             // Open the menu
-            ReactTestUtils.act(() => {
-              ReactTestUtils.Simulate.keyDown(button, { key: 'Enter' });
+            act(() => {
+              fireEvent.keyDown(button, { key: 'Enter' });
             });
 
-            ReactTestUtils.act(() => {
-              ReactTestUtils.Simulate.keyDown(menu, { key });
+            act(() => {
+              fireEvent.keyDown(menu, { key });
             });
             expect(onSelectSpy, 'The item is activated').to.have.been.calledOnce;
             expect(menu.hidden, 'The menu is closed').to.be.true;
@@ -481,8 +520,8 @@ describe('<Dropdown>', () => {
             true
           );
 
-          ReactTestUtils.act(() => {
-            ReactTestUtils.Simulate.keyDown(menu, { key: 'ArrowDown' });
+          act(() => {
+            fireEvent.keyDown(menu, { key: 'ArrowDown' });
           });
 
           expect(menu.getAttribute('aria-activedescendant'), 'Active item').to.equal('second-item');
@@ -500,8 +539,8 @@ describe('<Dropdown>', () => {
             true
           );
 
-          ReactTestUtils.act(() => {
-            ReactTestUtils.Simulate.keyDown(menu, { key: 'ArrowDown' });
+          act(() => {
+            fireEvent.keyDown(menu, { key: 'ArrowDown' });
           });
 
           expect(menu.getAttribute('aria-activedescendant'), 'Active item').to.equal('third-item');
@@ -519,8 +558,8 @@ describe('<Dropdown>', () => {
             true
           );
 
-          ReactTestUtils.act(() => {
-            ReactTestUtils.Simulate.keyDown(menu, { key: 'ArrowDown' });
+          act(() => {
+            fireEvent.keyDown(menu, { key: 'ArrowDown' });
           });
 
           expect(menu.getAttribute('aria-activedescendant'), 'Active item').to.equal('third-item');
@@ -538,15 +577,15 @@ describe('<Dropdown>', () => {
           const menu = instance.querySelector('[role="menu"]');
 
           // Open the menu
-          ReactTestUtils.act(() => {
-            ReactTestUtils.Simulate.keyDown(button, { key: 'Enter' });
+          act(() => {
+            fireEvent.keyDown(button, { key: 'Enter' });
           });
 
-          ReactTestUtils.act(() => {
-            ReactTestUtils.Simulate.keyDown(menu, { key: 'ArrowDown' });
+          act(() => {
+            fireEvent.keyDown(menu, { key: 'ArrowDown' });
           });
-          ReactTestUtils.act(() => {
-            ReactTestUtils.Simulate.keyDown(menu, { key: 'ArrowUp' });
+          act(() => {
+            fireEvent.keyDown(menu, { key: 'ArrowUp' });
           });
           expect(menu.getAttribute('aria-activedescendant'), 'Active item').to.equal('first-item');
         });
@@ -562,11 +601,11 @@ describe('<Dropdown>', () => {
             true
           );
 
-          ReactTestUtils.act(() => {
-            ReactTestUtils.Simulate.keyDown(menu, { key: 'ArrowDown' });
+          act(() => {
+            fireEvent.keyDown(menu, { key: 'ArrowDown' });
           });
-          ReactTestUtils.act(() => {
-            ReactTestUtils.Simulate.keyDown(menu, { key: 'ArrowUp' });
+          act(() => {
+            fireEvent.keyDown(menu, { key: 'ArrowUp' });
           });
           expect(menu.getAttribute('aria-activedescendant'), 'Active item').to.equal('first-item');
         });
@@ -583,11 +622,11 @@ describe('<Dropdown>', () => {
             true
           );
 
-          ReactTestUtils.act(() => {
-            ReactTestUtils.Simulate.keyDown(menu, { key: 'ArrowDown' });
+          act(() => {
+            fireEvent.keyDown(menu, { key: 'ArrowDown' });
           });
-          ReactTestUtils.act(() => {
-            ReactTestUtils.Simulate.keyDown(menu, { key: 'ArrowUp' });
+          act(() => {
+            fireEvent.keyDown(menu, { key: 'ArrowUp' });
           });
           expect(menu.getAttribute('aria-activedescendant'), 'Active item').to.equal('first-item');
         });
@@ -606,12 +645,12 @@ describe('<Dropdown>', () => {
           const menu = instance.querySelector('[role="menu"]');
 
           // Open the menu
-          ReactTestUtils.act(() => {
-            ReactTestUtils.Simulate.keyDown(button, { key: 'Enter' });
+          act(() => {
+            fireEvent.keyDown(button, { key: 'Enter' });
           });
 
-          ReactTestUtils.act(() => {
-            ReactTestUtils.Simulate.keyDown(menu, { key: 'ArrowRight' });
+          act(() => {
+            fireEvent.keyDown(menu, { key: 'ArrowRight' });
           });
 
           const submenu = instance.querySelector('#submenu');
@@ -630,8 +669,8 @@ describe('<Dropdown>', () => {
             true
           );
 
-          ReactTestUtils.act(() => {
-            ReactTestUtils.Simulate.keyDown(menu, { key: 'ArrowRight' });
+          act(() => {
+            fireEvent.keyDown(menu, { key: 'ArrowRight' });
           });
 
           expect(menu.getAttribute('aria-activedescendant'), 'Active item').to.equal('first-item');
@@ -653,19 +692,19 @@ describe('<Dropdown>', () => {
           const menu = instance.querySelector('[role="menu"]');
 
           // Open the menu
-          ReactTestUtils.act(() => {
-            ReactTestUtils.Simulate.keyDown(button, { key: 'Enter' });
+          act(() => {
+            fireEvent.keyDown(button, { key: 'Enter' });
           });
 
           // Open the submenu
-          ReactTestUtils.act(() => {
-            ReactTestUtils.Simulate.keyDown(menu, { key: 'Enter' });
+          act(() => {
+            fireEvent.keyDown(menu, { key: 'Enter' });
           });
 
           const submenu = instance.querySelector('#submenu');
 
-          ReactTestUtils.act(() => {
-            ReactTestUtils.Simulate.keyDown(submenu, { key: 'ArrowRight' });
+          act(() => {
+            fireEvent.keyDown(submenu, { key: 'ArrowRight' });
           });
 
           expect(submenu.hidden, 'The submenu is closed').to.be.true;
@@ -685,19 +724,19 @@ describe('<Dropdown>', () => {
           const menu = instance.querySelector('[role="menu"]');
 
           // Open the menu
-          ReactTestUtils.act(() => {
-            ReactTestUtils.Simulate.keyDown(button, { key: 'Enter' });
+          act(() => {
+            fireEvent.keyDown(button, { key: 'Enter' });
           });
 
           // Open the submenu
-          ReactTestUtils.act(() => {
-            ReactTestUtils.Simulate.keyDown(menu, { key: 'Enter' });
+          act(() => {
+            fireEvent.keyDown(menu, { key: 'Enter' });
           });
 
           const submenu = instance.querySelector('#submenu');
 
-          ReactTestUtils.act(() => {
-            ReactTestUtils.Simulate.keyDown(submenu, { key: 'ArrowLeft' });
+          act(() => {
+            fireEvent.keyDown(submenu, { key: 'ArrowLeft' });
           });
 
           expect(submenu.hidden, 'The submenu is closed').to.be.true;
@@ -718,12 +757,12 @@ describe('<Dropdown>', () => {
           const menu = instance.querySelector('[role="menu"]');
 
           // Open the menu
-          ReactTestUtils.act(() => {
-            ReactTestUtils.Simulate.keyDown(button, { key: 'Enter' });
+          act(() => {
+            fireEvent.keyDown(button, { key: 'Enter' });
           });
 
-          ReactTestUtils.act(() => {
-            ReactTestUtils.Simulate.keyDown(menu, { key: 'ArrowLeft' });
+          act(() => {
+            fireEvent.keyDown(menu, { key: 'ArrowLeft' });
           });
 
           const submenu = instance.querySelector('#submenu');
@@ -745,8 +784,8 @@ describe('<Dropdown>', () => {
             true
           );
 
-          ReactTestUtils.act(() => {
-            ReactTestUtils.Simulate.keyDown(menu, { key: 'ArrowLeft' });
+          act(() => {
+            fireEvent.keyDown(menu, { key: 'ArrowLeft' });
           });
 
           expect(menu.getAttribute('aria-activedescendant'), 'Active item').to.equal('first-item');
@@ -766,12 +805,12 @@ describe('<Dropdown>', () => {
           const menu = instance.querySelector('[role="menu"]');
 
           // Open the menu
-          ReactTestUtils.act(() => {
-            ReactTestUtils.Simulate.keyDown(button, { key: 'Enter' });
+          act(() => {
+            fireEvent.keyDown(button, { key: 'Enter' });
           });
 
-          ReactTestUtils.act(() => {
-            ReactTestUtils.Simulate.keyDown(menu, { key: 'End' });
+          act(() => {
+            fireEvent.keyDown(menu, { key: 'End' });
           });
           expect(menu.getAttribute('aria-activedescendant'), 'Active item').to.equal('last-item');
         });
@@ -789,16 +828,16 @@ describe('<Dropdown>', () => {
           const menu = instance.querySelector('[role="menu"]');
 
           // Open the menu
-          ReactTestUtils.act(() => {
-            ReactTestUtils.Simulate.keyDown(button, { key: 'Enter' });
+          act(() => {
+            fireEvent.keyDown(button, { key: 'Enter' });
           });
 
-          ReactTestUtils.act(() => {
-            ReactTestUtils.Simulate.keyDown(menu, { key: 'End' });
+          act(() => {
+            fireEvent.keyDown(menu, { key: 'End' });
           });
 
-          ReactTestUtils.act(() => {
-            ReactTestUtils.Simulate.keyDown(menu, { key: 'Home' });
+          act(() => {
+            fireEvent.keyDown(menu, { key: 'Home' });
           });
           expect(menu.getAttribute('aria-activedescendant'), 'Active item').to.equal('first-item');
         });
@@ -813,13 +852,13 @@ describe('<Dropdown>', () => {
           </Dropdown>
         );
         const button = instance.querySelector('[role="button"]');
-        ReactTestUtils.act(() => {
-          ReactTestUtils.Simulate.click(button);
+        act(() => {
+          fireEvent.click(button);
         });
 
         const menu = instance.querySelector('[role="menu"]');
-        ReactTestUtils.act(() => {
-          ReactTestUtils.Simulate.keyDown(menu, { key: 'Escape' });
+        act(() => {
+          fireEvent.keyDown(menu, { key: 'Escape' });
         });
 
         assert.isTrue(menu.hidden, 'The menu is closed');
@@ -846,16 +885,32 @@ describe('<Dropdown>', () => {
     assert.equal(button.textContent, 'new');
   });
 
-  it('Should render a As Component', () => {
-    const AsComponent = React.forwardRef((_, ref) => <div ref={ref}>As Component</div>);
-    const instance = getDOMNode(
-      <Nav>
-        <Dropdown title="">
-          <Dropdown.Item as={AsComponent}>item-1</Dropdown.Item>
-        </Dropdown>
-      </Nav>
-    );
-    ReactTestUtils.Simulate.click(instance.querySelector('[role="button"]'));
-    assert.equal(instance.textContent, 'As Component');
+  context('[Deprecated] Usage within <Nav>', () => {
+    it('Should warn deprecation message', () => {
+      sinon.spy(console, 'warn');
+
+      render(
+        <Nav>
+          <Dropdown title="Dropdown"></Dropdown>
+        </Nav>
+      );
+
+      expect(console.warn).to.have.been.calledWith(
+        'Usage of <Dropdown> within <Nav> is deprecated. Replace with <Nav.Menu>'
+      );
+    });
+
+    it('Should render a As Component', () => {
+      const AsComponent = React.forwardRef((_, ref) => <div ref={ref}>As Component</div>);
+      const instance = getDOMNode(
+        <Nav>
+          <Dropdown title="">
+            <Dropdown.Item as={AsComponent}>item-1</Dropdown.Item>
+          </Dropdown>
+        </Nav>
+      );
+      fireEvent.click(instance.querySelector('[role="button"]'));
+      assert.equal(instance.textContent, 'As Component');
+    });
   });
 });

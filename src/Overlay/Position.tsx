@@ -18,23 +18,27 @@ import { ResizeObserver } from '@juggle/resize-observer';
 import isElement from '../DOMHelper/isElement';
 import positionUtils, { PositionType } from './positionUtils';
 import { getDOMNode } from '../utils';
-import { TypeAttributes } from '../@types/common';
+import { CursorPosition, TypeAttributes } from '../@types/common';
 import { useUpdateEffect } from '../utils';
 
 export interface PositionChildProps {
   className: string;
   left?: number;
   top?: number;
+  arrowOffsetLeft?: number;
+  arrowOffsetTop?: number;
 }
 
 export interface PositionProps {
-  children: (props: PositionChildProps, ref) => React.ReactElement;
+  children: (props: PositionChildProps, ref: React.RefObject<HTMLElement>) => React.ReactElement;
   className?: string;
   container?: HTMLElement | (() => HTMLElement | null) | null;
   containerPadding?: number;
   placement?: TypeAttributes.Placement;
   preventOverflow?: boolean;
   triggerTarget?: React.RefObject<any>;
+  followCursor?: boolean;
+  cursorPosition?: CursorPosition | null;
 }
 
 const usePosition = (
@@ -46,7 +50,9 @@ const usePosition = (
     preventOverflow = false,
     containerPadding = 0,
     container,
-    triggerTarget
+    triggerTarget,
+    followCursor,
+    cursorPosition
   } = props;
 
   const containerRef = useRef<Element | null>(null);
@@ -56,8 +62,8 @@ const usePosition = (
   const defaultPosition = {
     positionLeft: 0,
     positionTop: 0,
-    arrowOffsetLeft: null,
-    arrowOffsetTop: null
+    arrowOffsetLeft: undefined,
+    arrowOffsetTop: undefined
   };
   const [position, setPosition] = useState<PositionType>(defaultPosition);
   const utils = useMemo(
@@ -95,9 +101,14 @@ const usePosition = (
       const containerElement = getContainer(
         typeof container === 'function' ? container() : container ?? (null as any),
         ownerDocument(ref.current).body
-      );
+      ) as HTMLElement;
 
-      const posi = utils.calcOverlayPosition(overlay, targetElement, containerElement);
+      const posi = utils.calcOverlayPosition(
+        overlay,
+        targetElement,
+        containerElement,
+        followCursor ? cursorPosition : undefined
+      );
 
       if (forceUpdateDOM && overlay) {
         const preClassName = overlay?.className?.match(/(placement-\S+)/)?.[0];
@@ -113,7 +124,7 @@ const usePosition = (
       containerRef.current = containerElement;
       lastTargetRef.current = targetElement;
     },
-    [container, ref, triggerTarget, utils]
+    [container, ref, triggerTarget, utils, followCursor, cursorPosition]
   );
 
   useEffect(() => {
@@ -157,8 +168,8 @@ export interface PositionInstance {
 }
 
 const Position = React.forwardRef((props: PositionProps, ref) => {
-  const { children, className } = props;
-  const childRef = React.useRef<HTMLElement | null>(null);
+  const { children, className, followCursor, cursorPosition } = props;
+  const childRef = React.useRef<HTMLElement>(null);
 
   const [position, updatePosition] = usePosition(props, childRef);
   const { positionClassName, arrowOffsetLeft, arrowOffsetTop, positionLeft, positionTop } =
@@ -170,6 +181,11 @@ const Position = React.forwardRef((props: PositionProps, ref) => {
     },
     updatePosition
   }));
+
+  useEffect(() => {
+    if (!followCursor || !cursorPosition) return;
+    updatePosition();
+  }, [followCursor, cursorPosition, updatePosition]);
 
   if (typeof children === 'function') {
     const childProps = {

@@ -21,7 +21,6 @@ const {
 
 const __USE_SRC__ = VERCEL_ENV === 'preview' || VERCEL_ENV === 'local';
 
-const RSUITE_ROOT = path.join(__dirname, '../src');
 const LANGUAGES = {
   // key: [language, path]
   default: ['en', ''],
@@ -30,10 +29,6 @@ const LANGUAGES = {
 };
 
 const getLanguage = language => LANGUAGES[language] || '';
-const babelBuildInclude = __USE_SRC__
-  ? [RSUITE_ROOT, path.join(__dirname, './')]
-  : [path.join(__dirname, './')];
-
 /**
  * @type {import('next').NextConfig}
  */
@@ -46,6 +41,9 @@ module.exports = {
     // ESLint is ignored because it's already run in CI workflow
     ignoreDuringBuilds: true
   },
+  experimental: {
+    externalDir: true
+  },
   /**
    *
    * @param {import('webpack').Configuration} config
@@ -56,25 +54,15 @@ module.exports = {
     config.module.rules.unshift({
       test: /\.svg$/,
       include: SVG_LOGO_PATH,
+      issuer: /\.[jt]sx?$/,
       use: [
-        {
-          loader: 'babel-loader'
-        },
         {
           loader: '@svgr/webpack',
           options: {
-            babel: false,
             icon: true
           }
         }
       ]
-    });
-
-    config.module.rules.push({
-      test: /\.ts|tsx?$/,
-      use: ['babel-loader?babelrc'],
-      include: babelBuildInclude,
-      exclude: /node_modules/
     });
 
     config.module.rules.push({
@@ -117,22 +105,26 @@ module.exports = {
       test: /\.md$/,
       use: [
         {
-          loader: 'html-loader'
-        },
-        {
-          loader: 'markdown-loader',
+          loader: 'react-code-view/webpack-md-loader',
           options: {
-            pedantic: true,
-            renderer: markdownRenderer([
-              'javascript',
-              'bash',
-              'xml',
-              'css',
-              'less',
-              'json',
-              'diff',
-              'typescript'
-            ])
+            htmlOptions: {
+              // HTML Loader options
+              // See https://github.com/webpack-contrib/html-loader#options
+            },
+            markedOptions: {
+              renderer: markdownRenderer([
+                'javascript',
+                'bash',
+                'xml',
+                'css',
+                'less',
+                'json',
+                'diff',
+                'typescript'
+              ])
+              // Pass options to marked
+              // See https://marked.js.org/using_advanced#options
+            }
           }
         }
       ]
@@ -217,11 +209,11 @@ module.exports = {
 
     return map;
   },
-  exclude: SVG_LOGO_PATH,
   onDemandEntries: {
     // Period (in ms) where the server will keep pages in the buffer
     maxInactiveAge: 120 * 1e3, // default 25s
     // Number of pages that should be kept simultaneously without being disposed
     pagesBufferLength: 3 // default 2
-  }
+  },
+  pageExtensions: ['tsx']
 };
